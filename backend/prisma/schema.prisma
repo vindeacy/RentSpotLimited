@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  role         String
+  email        String   @unique
+  passwordHash String
+  name         String?
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  landlord     Landlord?
+  tenant       Tenant?
+  messagesFrom Message[] @relation("fromUser")
+  messagesTo   Message[] @relation("toUser")
+}
+
+model Landlord {
+  id          String     @id @default(uuid())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String     @unique
+  companyName String?
+  verified    Boolean    @default(false)
+  properties  Property[]
+  leases      Lease[]
+  createdAt   DateTime   @default(now())
+}
+
+model Tenant {
+  id        String    @id @default(uuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String    @unique
+  dob       DateTime?
+  idDocUrl  String?
+  leases    Lease[]
+  createdAt DateTime  @default(now())
+}
+
+model Property {
+  id             String          @id @default(uuid())
+  landlord       Landlord        @relation(fields: [landlordId], references: [id])
+  landlordId     String
+  title          String
+  messages       Message[]
+  slug           String          @unique
+  description    String?
+  addressLine    String?
+  city           String?
+  state          String?
+  postalCode     String?
+  country        String?
+  latitude       Float?
+  longitude      Float?
+  price          Float
+  currency       String?
+  deposit        Float?
+  availableFrom  DateTime?
+  propertyType   String?
+  bedrooms       Int?
+  bathrooms      Int?
+  size           Int?
+  amenities      String[]        @default([])
+  status         String          @default("vacant")
+  seoTitle       String?
+  seoDescription String?
+  images         PropertyImage[]
+  applications   Application[]
+  leases         Lease[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  url        String
+  alt        String?
+  position   Int      @default(0)
+}
+
+model Application {
+  id             String   @id @default(uuid())
+  property       Property @relation(fields: [propertyId], references: [id])
+  propertyId     String
+  tenantUserId   String?
+  applicantName  String?
+  applicantEmail String?
+  docs           Json?
+  status         String   @default("new")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Lease {
+  id         String    @id @default(uuid())
+  property   Property  @relation(fields: [propertyId], references: [id])
+  propertyId String
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+  tenantId   String?
+  landlord   Landlord  @relation(fields: [landlordId], references: [id])
+  landlordId String
+  startDate  DateTime?
+  endDate    DateTime?
+  rent       Float?
+  status     String    @default("pending")
+  createdAt  DateTime  @default(now())
+}
+
+model Message {
+  id         String    @id @default(uuid())
+  fromUser   User?     @relation("fromUser", fields: [fromUserId], references: [id])
+  fromUserId String?
+  toUser     User?     @relation("toUser", fields: [toUserId], references: [id])
+  toUserId   String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  subject    String?
+  body       String?
+  read       Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+}
