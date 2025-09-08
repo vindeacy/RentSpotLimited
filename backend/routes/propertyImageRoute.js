@@ -27,6 +27,7 @@ router.post('/upload', authorizeRoles('landlord', 'admin'), uploadPropertyImage.
 router.put('/:id', authorizeRoles('landlord', 'admin'), updatePropertyImage);
 
 // Get single property image by ID
+//here we use the property image record id (in the db) to get the image details and not the property id
 router.get('/:id', getPropertyImageById);
 
 // Create property image

@@ -30,16 +30,31 @@ export async function getTenantById(req, res) {
 }
 
 // Create tenant
+//will add the leaseID later using the 'put/patch' method after creating the lease
 export async function createTenant(req, res) {
-	try {
-		const { userId, dob, idDocUrl } = req.body;
-		const tenant = await prisma.tenant.create({
-			data: { userId, dob, idDocUrl }
-		});
-		res.status(201).json({ tenant });
-	} catch (err) {
-		res.status(500).json({ error: 'Failed to create tenant.' });
-	}
+  try {
+    const { userId, dob, idDocUrl, verified } = req.body;
+
+    // Check if user exists and is a tenant
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.role !== 'tenant') {
+      return res.status(400).json({ error: 'User must exist and have role tenant.' });
+    }
+
+    const tenant = await prisma.tenant.create({
+      data: {
+        userId,
+        dob: dob ? new Date(dob) : undefined,
+        idDocUrl,
+        verified: verified ?? false
+      }
+    });
+
+    res.status(201).json({ tenant });
+  } catch (err) {
+    console.error('Create tenant error:', err);
+    res.status(500).json({ error: 'Failed to create tenant.' });
+  }
 }
 
 // Update tenant
