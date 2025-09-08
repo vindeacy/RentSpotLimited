@@ -1,7 +1,7 @@
 
 import express from 'express';
 import { authenticationMiddleware } from '../Middleware/authenticationMiddleware.js';
-import { getUserProfile, updateUserProfile, deleteUser } from '../controller/userController.js';
+import { getUserProfile, getAllUsers, updateUserProfile, deleteUser } from '../controller/userController.js';
 
 const router = express.Router();
 
@@ -12,6 +12,9 @@ router.use(authenticationMiddleware);
 
 // Get user profile
 router.get('/profile', getUserProfile);
+
+// Get all users (admin only)
+router.get('/', getAllUsers);
 
 // Update user profile
 router.put('/profile', updateUserProfile);
