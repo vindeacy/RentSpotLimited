@@ -43,6 +43,7 @@ export async function createLandlord(req, res) {
 }
 
 // Update landlord
+// on this, we are going to use the user update method (landlord is a user)
 export async function updateLandlord(req, res) {
 	try {
 		const { id } = req.params;
