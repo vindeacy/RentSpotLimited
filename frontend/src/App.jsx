@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "./Constants/header.jsx";
+import Footer from "./Constants/footer.jsx";
+import LandingPage from "./hero/landingPage.jsx";
+import Login from "./user/login.jsx";
+import Register from "./user/register.jsx";
+import Faqs from "./component/Faqs.jsx";
+import ContactUs from "./contact/ContactUs.jsx";
+// Tenant Dashboard and related pages
+import Dashboard from "./pages/TenantDashboard/Dashboard.jsx";
+import PropertyListing from "./component/PropertyListing.jsx";
+import PropertyDetails from "./pages/TenantDashboard/PropertyDetails.jsx";
+import PropertySearch from "./pages/TenantDashboard/PropertySearch.jsx";
+// import Profile from "./pages/TenantDashboard/profile.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Header />
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <LandingPage />
+                <Faqs />
+                <ContactUs />
+              </>
+            }
+          />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          {/* Dashboard route: sidebar navigation handles profile/properties */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* Property listing and details (if you want separate pages) */}
+          <Route path="/properties" element={<PropertyListing />} />
+          <Route path="/property/:id" element={<PropertyDetails />} />
+          {/* Property search (optional as a separate page) */}
+          <Route path="/property-search" element={<PropertySearch />} />
+          {/* Profile route (optional, but not needed if using dashboard sidebar) */}
+          {/* <Route path="/profile" element={<Profile />} /> */}
+        </Routes>
+      </BrowserRouter>
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
