@@ -1,60 +1,80 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { useRegisterMutation } from '../store/api/authApi';
+import housekey from '../images/housekey.png'; 
+import { Form, Button, Alert, Container, Row, Col, Image } from 'react-bootstrap';
 
 export default function Register() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState('tenant');
   const [success, setSuccess] = useState('');
+
+  const [register, { isLoading, error }] = useRegisterMutation();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
     setSuccess('');
-    setLoading(true);
+    
     try {
-      const role = 'tenant'; // Assign default role here
-      const res = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, role }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-         if (data.error && data.error.toLowerCase().includes('user already exists')) {
-          // Navigate to login page if user already exists
-          navigate('/login');
-        } else {
-          setError(data.error || 'Registration failed');
-        }
-      } else {
-        setSuccess('Registration successful! You can now log in.');
-        setEmail('');
-        setName('');
-        setPassword('');
-        //redirect to login page after successful registration
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000); // 2 seconds delay to show success message
-      }
+      const result = await register({ email, password, name, role }).unwrap();
+      
+      setSuccess('Registration successful! You can now log in.');
+      setEmail('');
+      setName('');
+      setPassword('');
+      
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
-      setError('Network error');
+      if (err.data?.error && err.data.error.toLowerCase().includes('user already exists')) {
+        navigate('/login');
+      }
+      // Error is automatically handled by RTK Query
     }
-    setLoading(false);
   }
 
   return (
-    <Container className="d-flex align-items-center justify-content-center min-vh-100">
-      <Row className="w-100 justify-content-center">
-        <Col xs={12} sm={8} md={6} lg={4}>
-          <Form onSubmit={handleSubmit} className="p-4 border rounded shadow bg-white">
+    <Container fluid className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <Row className="w-100 shadow-lg rounded overflow-hidden" style={{ maxWidth: '900px' }}>
+        
+        {/* Left column: Image */}
+        <Col md={6} className="d-none d-md-flex p-0">
+          <Image 
+            src={housekey}
+            alt="Welcome to RentSpot"
+            className="w-100 h-100 object-fit-cover"
+            style={{ objectFit: 'cover' }}
+          />
+        </Col>
+
+        <span 
+          className="d-none d-md-block position-absolute" 
+          style={{
+            left: '50%',
+            top: '0',
+            bottom: '0',
+            width: '2px',
+            backgroundColor: '#dee2e6',
+            transform: 'translateX(-50%)',
+            zIndex: 1
+          }}
+        ></span>
+
+        {/* Right column: Form */}
+        <Col xs={12} md={6} className="bg-white p-4">
+          <Form onSubmit={handleSubmit} className="h-100 d-flex flex-column justify-content-center">
             <h2 className="mb-4 text-center">Register</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
+            {error && (
+              <Alert variant="danger">
+                {error.data?.error || error.message || 'Registration failed'}
+              </Alert>
+            )}
             {success && <Alert variant="success">{success}</Alert>}
+            
             <Form.Group className="mb-3" controlId="formName">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -65,6 +85,7 @@ export default function Register() {
                 autoComplete="name"
               />
             </Form.Group>
+            
             <Form.Group className="mb-3" controlId="formEmail">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -75,7 +96,8 @@ export default function Register() {
                 autoComplete="email"
               />
             </Form.Group>
-            <Form.Group className="mb-4" controlId="formPassword">
+            
+            <Form.Group className="mb-3" controlId="formPassword">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -85,14 +107,41 @@ export default function Register() {
                 autoComplete="new-password"
               />
             </Form.Group>
+
+            <Form.Group className="mb-4" controlId="formRole">
+              <Form.Label>I am a</Form.Label>
+              <Form.Select
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                required
+              >
+                <option value="tenant">Tenant</option>
+                <option value="landlord">Landlord</option>
+              </Form.Select>
+            </Form.Group>
+            
             <Button
               variant="primary"
               type="submit"
               className="w-100"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? 'Registering...' : 'Register'}
+              {isLoading ? 'Registering...' : 'Register'}
             </Button>
+            
+            {/* Already have an account link */}
+            <div className="text-center mt-3">
+              <p className="mb-0">
+                Already have an account?{' '}
+                <Button
+                  variant="link"
+                  className="p-0 text-decoration-none"
+                  onClick={() => navigate('/login')}
+                >
+                  Login here
+                </Button>
+              </p>
+            </div>
           </Form>
         </Col>
       </Row>

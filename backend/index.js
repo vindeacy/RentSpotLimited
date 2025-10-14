@@ -1,6 +1,19 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import authRoute from './routes/authRoute.js';
+import userRoute from './routes/userRoute.js';
+import tenantRoute from './routes/tenantRoute.js';
+import landlordRoute from './routes/landlordRoute.js';
+import propertyRoute from './routes/propertyRoute.js';
+import propertyImageRoute from './routes/propertyImageRoute.js';
+import applicationRoute from './routes/applicationRoute.js';
+import leaseRoute from './routes/leaseRoute.js';
+import messageRoute from './routes/messageRoute.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import tenantProfileRoutes from './routes/tenantProfileRoutes.js';
+import maintenanceRoutes from './routes/maintenanceRoutes.js';
+
 
 dotenv.config();
 const app = express();
@@ -13,15 +26,6 @@ app.get('/', (req, res) => {
 });
 
 
-import authRoute from './routes/authRoute.js';
-import userRoute from './routes/userRoute.js';
-import tenantRoute from './routes/tenantRoute.js';
-import landlordRoute from './routes/landlordRoute.js';
-import propertyRoute from './routes/propertyRoute.js';
-import propertyImageRoute from './routes/propertyImageRoute.js';
-import applicationRoute from './routes/applicationRoute.js';
-import leaseRoute from './routes/leaseRoute.js';
-import messageRoute from './routes/messageRoute.js';
 
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
@@ -32,6 +36,9 @@ app.use('/api/property-images', propertyImageRoute);
 app.use('/api/applications', applicationRoute);
 app.use('/api/leases', leaseRoute);
 app.use('/api/messages', messageRoute);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/tenant-profile', tenantProfileRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

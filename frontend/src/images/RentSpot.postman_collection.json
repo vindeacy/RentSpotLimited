@@ -1,0 +1,1556 @@
+{
+	"info": {
+		"_postman_id": "5a691d7b-c12d-4cc3-bb17-d21cf3228708",
+		"name": "RentSpot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41669872",
+		"_collection_link": "https://warped-space-928228.postman.co/workspace/apbc~5fd006a2-77d7-4316-be4f-e24f7e11e1a6/collection/41669872-5a691d7b-c12d-4cc3-bb17-d21cf3228708?action=share&source=collection_link&creator=41669872"
+	},
+	"item": [
+		{
+			"name": "Landlord",
+			"item": [
+				{
+					"name": "newLandlord",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjQxNTcsImV4cCI6MTc1NzQ1MDU1N30.qNtXT7x0BNRhkZJUvWVTzjuE6T_L-UFACqOUkiVRfpo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"f30abcd0-2efb-46f9-90ef-e027cb4539b0\",\r\n  \"companyName\": \"Qara Rentals\",\r\n  \"verified\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/landlords",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"landlords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllLandlords",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjUzNzYsImV4cCI6MTc1NzQ1MTc3Nn0.w1keC1v_A91nFTjaY1yRhgXbv7HIIeNpzSab0_3EAxE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"613701db-b74f-4791-b7d2-b3aa2db666f7\",\r\n  \"companyName\": \"Acme Rentals\",\r\n  \"verified\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/landlords/e37cc268-4240-42bd-b7f1-550ddb1c56fd",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"landlords",
+								"e37cc268-4240-42bd-b7f1-550ddb1c56fd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getLandlordID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjU0MzgsImV4cCI6MTc1NzQ1MTgzOH0.8tWBw1z4EwRZ6ZyRb0T_GkNnT9UFsemXutN183ZXsWE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"613701db-b74f-4791-b7d2-b3aa2db666f7\",\r\n  \"companyName\": \"Acme Rentals\",\r\n  \"verified\": true\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/landlords/e37cc268-4240-42bd-b7f1-550ddb1c56fd",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"landlords",
+								"e37cc268-4240-42bd-b7f1-550ddb1c56fd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteLanlord",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"613701db-b74f-4791-b7d2-b3aa2db666f7\",\r\n  \"companyName\": \"Acme Rentals\",\r\n  \"verified\": true\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/landlords/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"landlords",
+								"id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateLanlord",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjU2ODcsImV4cCI6MTc1NzQ1MjA4N30.YDEKKaOKi1xYWBgYtFlZHC1jEN28mxWPr6N9pNt73cw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \r\n  \"phone\": \"+254757579824\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tenant",
+			"item": [
+				{
+					"name": "createTenant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjA4MTAsImV4cCI6MTc1NzQ0NzIxMH0.y8NswAThV96jwCvdNbBH1yjqUKD0JgY04AQ_BzdkGqQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": \"c5ad603f-e058-472a-b412-403bfd759c7f\",\r\n  \"dob\": \"1990-01-01\",\r\n  \"idDocUrl\": \"/uploads/1757360378644-karen.png\",\r\n  \"verified\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateTenant",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjYxOTIsImV4cCI6MTc1NzQ1MjU5Mn0.5SANNCFzIZK4zhLm7Ho_KVQZQCiFkeWzFGIwVUG35H4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \r\n  \"phone\": \"+254757579824\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllTenants",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjU2ODcsImV4cCI6MTc1NzQ1MjA4N30.YDEKKaOKi1xYWBgYtFlZHC1jEN28mxWPr6N9pNt73cw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \r\n  \"phone\": \"+254757579824\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTenantByID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjU2ODcsImV4cCI6MTc1NzQ1MjA4N30.YDEKKaOKi1xYWBgYtFlZHC1jEN28mxWPr6N9pNt73cw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \r\n  \"phone\": \"+254757579824\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants",
+								"id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletTenantbyID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczNjU2ODcsImV4cCI6MTc1NzQ1MjA4N30.YDEKKaOKi1xYWBgYtFlZHC1jEN28mxWPr6N9pNt73cw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \r\n  \"phone\": \"+254757579824\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants",
+								"id"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "registerAdmin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"deacyvin@gmail.com\",\r\n  \"password\": \"Vindeacy123#\",\r\n  \"name\": \"Deacy Vin\",\r\n  \"role\": \"admin\" // or \"landlord\" or \"tenant\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginAdmin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"deacyvin@gmail.com\",\r\n  \"password\": \"Vindeacy123#\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUserProfile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"phone\": \"+254746051906\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUser",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"deacyvin@gmail.com\",\r\n  \"password\": \"Vindeacy123#\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllUsers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTc1NzkxNjcsImV4cCI6MTc1NzY2NTU2N30.8tAuNxE3E7uAGGDLvHztK0BNM2asBM7kebqcNHWO0Os",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LandlordRegister",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"deacyvin123@gmail.com\",\r\n  \"password\": \"deacyvin123#\",\r\n  \"name\": \"Vin Deacy\",\r\n  \"role\": \"landlord\", // or \"admin\" or \"tenant\"\r\n  \"phone\": \"+254757579824\"\r\n\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LandlordLogin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"deacyvin123@gmail.com\",\r\n  \"password\": \"deacyvin123#\",\r\n  \"name\": \"Vin Deacy\",\r\n  \"role\": \"landlord\", // or \"admin\" or \"tenant\"\r\n  \"phone\": \"+254757579824\"\r\n\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TenantRegister",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"tenant1234@gmail.com\",\r\n  \"password\": \"tenant12\",\r\n  \"name\": \"First Tenant\",\r\n  \"role\": \"tenant\", // or \"admin\" or \"landlord\"\r\n  \"phone\": \"+254757579820\"\r\n\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TenantLogin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"tenant1234@gmail.com\",\r\n  \"password\": \"tenant12\"\r\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2landlord",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"vindeacy123@gmail.com\",\r\n  \"password\": \"deacyvin#\",\r\n  \"name\": \"Vin Deacy\",\r\n  \"role\": \"landlord\", // or \"admin\" or \"tenant\"\r\n  \"phone\": \"+254746372123\"\r\n\r\n  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2loginlandlord",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "  {\"email\": \"vindeacy123@gmail.com\",\r\n  \"password\": \"deacyvin#\"\r\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Property",
+			"item": [
+				{
+					"name": "createProperty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"landlordId\": \"26dcd3f6-5774-426c-a5bd-1c8825892494\",\r\n  \"title\": \"Modern Apartment\",\r\n  \"slug\": \"modern-apartment\",\r\n  \"description\": \"Spacious 2-bedroom apartment.\",\r\n  \"addressLine\": \"123 Main St\",\r\n  \"city\": \"Nairobi\",\r\n  \"state\": \"Nairobi\",\r\n  \"postalCode\": \"00100\",\r\n  \"country\": \"Kenya\",\r\n  \"latitude\": -1.2921,\r\n  \"longitude\": 36.8219,\r\n  \"price\": 50000,\r\n  \"currency\": \"KES\",\r\n  \"deposit\": 10000,\r\n  \"availableFrom\": \"2025-09-08\",\r\n  \"propertyType\": \"apartment\",\r\n  \"bedrooms\": 2,\r\n  \"bathrooms\": 2,\r\n  \"size\": 120,\r\n  \"amenities\": [\"Pool\", \"Gym\", \"Parking\"],\r\n  \"status\": \"available\",\r\n  \"seoTitle\": \"Best Apartment in Nairobi\",\r\n  \"seoDescription\": \"Find your dream home in Nairobi.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/properties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"properties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllproperties",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"AdminId\": \"10e572c0-cfaa-4a5b-8d81-286beaa8fbfe\",\r\n  \"title\": \"Modern Apartment\",\r\n  \"slug\": \"modern-apartment\",\r\n  \"description\": \"Spacious 2-bedroom apartment.\",\r\n  \"addressLine\": \"123 Main St\",\r\n  \"city\": \"Nairobi\",\r\n  \"state\": \"Nairobi\",\r\n  \"postalCode\": \"00100\",\r\n  \"country\": \"Kenya\",\r\n  \"latitude\": -1.2921,\r\n  \"longitude\": 36.8219,\r\n  \"price\": 50000,\r\n  \"currency\": \"KES\",\r\n  \"deposit\": 10000,\r\n  \"availableFrom\": \"2025-09-08\",\r\n  \"propertyType\": \"apartment\",\r\n  \"bedrooms\": 2,\r\n  \"bathrooms\": 2,\r\n  \"size\": 120,\r\n  \"amenities\": [\"Pool\", \"Gym\", \"Parking\"],\r\n  \"status\": \"available\",\r\n  \"seoTitle\": \"Best Apartment in Nairobi\",\r\n  \"seoDescription\": \"Find your dream home in Nairobi.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/properties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"properties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPropertybyID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"AdminId\": \"10e572c0-cfaa-4a5b-8d81-286beaa8fbfe\",\r\n  \"title\": \"Modern Apartment\",\r\n  \"slug\": \"modern-apartment\",\r\n  \"description\": \"Spacious 2-bedroom apartment.\",\r\n  \"addressLine\": \"123 Main St\",\r\n  \"city\": \"Nairobi\",\r\n  \"state\": \"Nairobi\",\r\n  \"postalCode\": \"00100\",\r\n  \"country\": \"Kenya\",\r\n  \"latitude\": -1.2921,\r\n  \"longitude\": 36.8219,\r\n  \"price\": 50000,\r\n  \"currency\": \"KES\",\r\n  \"deposit\": 10000,\r\n  \"availableFrom\": \"2025-09-08\",\r\n  \"propertyType\": \"apartment\",\r\n  \"bedrooms\": 2,\r\n  \"bathrooms\": 2,\r\n  \"size\": 120,\r\n  \"amenities\": [\"Pool\", \"Gym\", \"Parking\"],\r\n  \"status\": \"available\",\r\n  \"seoTitle\": \"Best Apartment in Nairobi\",\r\n  \"seoDescription\": \"Find your dream home in Nairobi.\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/properties/25a34378-1f32-4ece-943e-7c739986bc8d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"properties",
+								"25a34378-1f32-4ece-943e-7c739986bc8d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateProperty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Updated Title\",\r\n  \"price\": 55000,\r\n  \"status\": \"rented\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/properties/25a34378-1f32-4ece-943e-7c739986bc8d",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"properties",
+								"25a34378-1f32-4ece-943e-7c739986bc8d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteProperty",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"AdminId\": \"10e572c0-cfaa-4a5b-8d81-286beaa8fbfe\",\r\n  \"title\": \"Modern Apartment\",\r\n  \"slug\": \"modern-apartment\",\r\n  \"description\": \"Spacious 2-bedroom apartment.\",\r\n  \"addressLine\": \"123 Main St\",\r\n  \"city\": \"Nairobi\",\r\n  \"state\": \"Nairobi\",\r\n  \"postalCode\": \"00100\",\r\n  \"country\": \"Kenya\",\r\n  \"latitude\": -1.2921,\r\n  \"longitude\": 36.8219,\r\n  \"price\": 50000,\r\n  \"currency\": \"KES\",\r\n  \"deposit\": 10000,\r\n  \"availableFrom\": \"2025-09-08\",\r\n  \"propertyType\": \"apartment\",\r\n  \"bedrooms\": 2,\r\n  \"bathrooms\": 2,\r\n  \"size\": 120,\r\n  \"amenities\": [\"Pool\", \"Gym\", \"Parking\"],\r\n  \"status\": \"available\",\r\n  \"seoTitle\": \"Best Apartment in Nairobi\",\r\n  \"seoDescription\": \"Find your dream home in Nairobi.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/properties/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"properties",
+								"id"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PropertyImage",
+			"item": [
+				{
+					"name": "createPropertyImage",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"propertyId\": \"25a34378-1f32-4ece-943e-7c739986bc8d\",\r\n  \"url\": \"/PropertyImages/1757333523954-karen.png\",\r\n  \"alt\": \"Front view\",\r\n  \"position\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uploadImage",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/Deacy Vincensher/OneDrive/Desktop/RentSpotLimited/frontend/src/images/karen.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getPropertyImage",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images/bf243a82-f58b-4440-b8a1-5bfebc22dd48",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images",
+								"bf243a82-f58b-4440-b8a1-5bfebc22dd48"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllPropertyImage",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updatePropertyImage",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"alt\": \"Updated alt text\",\r\n  \"position\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images/bf243a82-f58b-4440-b8a1-5bfebc22dd48",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images",
+								"bf243a82-f58b-4440-b8a1-5bfebc22dd48"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deletePropertyImage",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTczMjg5NzcsImV4cCI6MTc1NzQxNTM3N30.xCeQffvB__ewkdoxi3c6Pp0tbqvE1rQdE2hkPLwMqq4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"alt\": \"Updated alt text\",\r\n  \"position\": 2\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/property-images/bf243a82-f58b-4440-b8a1-5bfebc22dd48",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"property-images",
+								"bf243a82-f58b-4440-b8a1-5bfebc22dd48"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Application",
+			"item": []
+		},
+		{
+			"name": "Lease",
+			"item": [
+				{
+					"name": "createLease",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzBhYmNkMC0yZWZiLTQ2ZjktOTBlZi1lMDI3Y2I0NTM5YjAiLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjQ4NTcsImV4cCI6MTc1NzQ1MTI1N30.BQwzm4IQiHSDg5MUVqf0cwYPn-pfGQVN6sYt5huV32k",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"propertyId\": \"25a34378-1f32-4ece-943e-7c739986bc8d\",\r\n  \"tenantId\": \"6c5437f8-8828-47e5-addd-8990e82dda52\",\r\n  \"landlordId\": \"e37cc268-4240-42bd-b7f1-550ddb1c56fd\",\r\n  \"startDate\": \"2025-09-08\",\r\n  \"endDate\": \"2026-09-08\",\r\n  \"rentAmount\": 50000,\r\n  \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/leases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"leases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateLease",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzBhYmNkMC0yZWZiLTQ2ZjktOTBlZi1lMDI3Y2I0NTM5YjAiLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjQ4NTcsImV4cCI6MTc1NzQ1MTI1N30.BQwzm4IQiHSDg5MUVqf0cwYPn-pfGQVN6sYt5huV32k",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"rent\": 50000,\r\n  \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/leases/03f837b3-ab5f-4e12-8a52-0e95c8f7ea18",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"leases",
+								"03f837b3-ab5f-4e12-8a52-0e95c8f7ea18"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getLeasebyID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjYxOTIsImV4cCI6MTc1NzQ1MjU5Mn0.5SANNCFzIZK4zhLm7Ho_KVQZQCiFkeWzFGIwVUG35H4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/leases/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"leases",
+								"id"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllLease",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjU0MzgsImV4cCI6MTc1NzQ1MTgzOH0.8tWBw1z4EwRZ6ZyRb0T_GkNnT9UFsemXutN183ZXsWE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/leases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"leases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteLease",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTM3MDFkYi1iNzRmLTQ3OTEtYjdkMi1iM2FhMmRiNjY2ZjciLCJyb2xlIjoibGFuZGxvcmQiLCJpYXQiOjE3NTczNjU0MzgsImV4cCI6MTc1NzQ1MTgzOH0.8tWBw1z4EwRZ6ZyRb0T_GkNnT9UFsemXutN183ZXsWE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/leases/id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"leases",
+								"id"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": []
+		},
+		{
+			"name": "Uploads",
+			"item": [
+				{
+					"name": "1st Upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "idDoc",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"type": "file",
+									"src": "/C:/Users/Deacy Vincensher/OneDrive/Desktop/RentSpotLimited/frontend/src/images/1st upload.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2nd Upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMGU1NzJjMC1jZmFhLTRhNWItOGQ4MS0yODZiZWFhOGZiZmUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTcyNjk1NTksImV4cCI6MTc1NzM1NTk1OX0.lQSeaIN7EQos3R6Zo79AnqknJc13n3LDUYxcBSsi7a8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "idDoc",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"type": "file",
+									"src": "/C:/Users/Deacy Vincensher/OneDrive/Desktop/RentSpotLimited/frontend/src/images/1st upload.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tenants/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tenants",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

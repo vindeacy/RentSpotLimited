@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,51 +8,82 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   role         String
-  email        String   @unique
+  email        String    @unique
   passwordHash String
   name         String?
   phone        String?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   landlord     Landlord?
-  tenant       Tenant?
   messagesFrom Message[] @relation("fromUser")
   messagesTo   Message[] @relation("toUser")
+  tenant       Tenant?
 }
 
 model Landlord {
   id          String     @id @default(uuid())
-  user        User       @relation(fields: [userId], references: [id])
   userId      String     @unique
   companyName String?
   verified    Boolean    @default(false)
-  properties  Property[]
-  leases      Lease[]
   createdAt   DateTime   @default(now())
+  user        User       @relation(fields: [userId], references: [id])
+  leases      Lease[]
+  properties  Property[]
 }
 
 model Tenant {
-  id        String    @id @default(uuid())
-  user      User      @relation(fields: [userId], references: [id])
-  userId    String    @unique
-  dob DateTime?
-  idDocUrl  String?
-  verified  Boolean   @default(false)
-  leaseId   String?
-  leases    Lease[]
-  createdAt DateTime  @default(now())
+  id                       String    @id @default(uuid())
+  userId                   String    @unique
+  dob                      DateTime?
+  idDocUrl                 String?
+  createdAt                DateTime  @default(now())
+  leaseId                  String?
+  verified                 Boolean   @default(false)
+  bankAccountInfo          Json?
+  currentPropertyId        String?
+  documentsUploaded        Boolean   @default(false)
+  emergencyContactEmail    String?
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelation String?
+  maxRent                  Float?
+  moveInDate               DateTime?
+  petOwner                 Boolean   @default(false)
+  preferredAreas           String[]  @default([])
+  preferredPaymentMethod   String?
+  previousAddress          String?
+  profileCompleted         Boolean   @default(false)
+  smokingStatus            String?   @default("non-smoker")
+  leases                   Lease[]
+  payments                 Payment[]
+  currentProperty          Property? @relation(fields: [currentPropertyId], references: [id])
+  user                     User      @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id            String    @id @default(uuid())
+  tenantId      String
+  leaseId       String
+  amount        Float
+  dueDate       DateTime
+  paidDate      DateTime?
+  paymentMethod String?
+  status        String    @default("pending")
+  reference     String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lease         Lease     @relation(fields: [leaseId], references: [id])
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
 }
 
 model Property {
   id             String          @id @default(uuid())
-  landlord       Landlord        @relation(fields: [landlordId], references: [id])
   landlordId     String
   title          String
-  messages       Message[]
   slug           String          @unique
   description    String?
   addressLine    String?
@@ -80,25 +105,27 @@ model Property {
   status         String          @default("vacant")
   seoTitle       String?
   seoDescription String?
-  images         PropertyImage[]
-  applications   Application[]
-  leases         Lease[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  applications   Application[]
+  leases         Lease[]
+  messages       Message[]
+  landlord       Landlord        @relation(fields: [landlordId], references: [id])
+  images         PropertyImage[]
+  tenants        Tenant[]
 }
 
 model PropertyImage {
   id         String   @id @default(uuid())
-  property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
   url        String
   alt        String?
   position   Int      @default(0)
+  property   Property @relation(fields: [propertyId], references: [id])
 }
 
 model Application {
   id             String   @id @default(uuid())
-  property       Property @relation(fields: [propertyId], references: [id])
   propertyId     String
   tenantUserId   String?
   applicantName  String?
@@ -107,33 +134,35 @@ model Application {
   status         String   @default("new")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  property       Property @relation(fields: [propertyId], references: [id])
 }
 
 model Lease {
   id         String    @id @default(uuid())
-  property   Property  @relation(fields: [propertyId], references: [id])
   propertyId String
-  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
   tenantId   String?
-  landlord   Landlord  @relation(fields: [landlordId], references: [id])
   landlordId String
   startDate  DateTime?
   endDate    DateTime?
   rent       Float?
   status     String    @default("pending")
   createdAt  DateTime  @default(now())
+  landlord   Landlord  @relation(fields: [landlordId], references: [id])
+  property   Property  @relation(fields: [propertyId], references: [id])
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+  payments   Payment[]
 }
 
 model Message {
   id         String    @id @default(uuid())
-  fromUser   User?     @relation("fromUser", fields: [fromUserId], references: [id])
   fromUserId String?
-  toUser     User?     @relation("toUser", fields: [toUserId], references: [id])
   toUserId   String?
-  property   Property? @relation(fields: [propertyId], references: [id])
   propertyId String?
   subject    String?
   body       String?
   read       Boolean   @default(false)
   createdAt  DateTime  @default(now())
+  fromUser   User?     @relation("fromUser", fields: [fromUserId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+  toUser     User?     @relation("toUser", fields: [toUserId], references: [id])
 }

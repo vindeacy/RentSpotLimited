@@ -5,13 +5,20 @@ import PropertyListing from "../component/PropertyListing";
 export default function HomePage() {
   const navigate = useNavigate();
 
-  function handleAuthClick() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate("/login");
-    } else {
-      navigate("/register");
-    }
+  function handleSignUp() {
+    navigate("/register");
+  }
+
+  function handleLogin() {
+    navigate("/login");
+  }
+
+  function handleStartExploring() {
+    navigate("/properties");
+  }
+
+  function handleGetStarted() {
+    navigate("/register");
   }
 
   return (
@@ -33,32 +40,19 @@ export default function HomePage() {
             Browse verified houses, apartments, and storage spaces tailored for
             your lifestyle.
           </p>
-          <Button size="lg" variant="warning" className="fw-semibold">
+          <Button
+            size="lg"
+            variant="warning"
+            className="fw-semibold"
+            onClick={handleStartExploring}
+          >
             Start Exploring
           </Button>
-          {/* Top-right button */}
-          <div
-            style={{
-              position: "absolute",
-              top: 30,
-              right: 40,
-              zIndex: 10,
-            }}
-          >
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleAuthClick}
-              className="fw-semibold"
-            >
-              Sign Up
-            </Button>
-          </div>
         </Container>
       </section>
 
-      {/* Featured Listings - fetched from backend */}
-      <PropertyListing title="Featured Rentals" limit={3} />
+      {/* Featured Listings - Now using public RTK Query */}
+      <PropertyListing title="Featured Rentals" limit={3} isPublic={true} />
 
       {/* Why Choose Us */}
       <section className="py-5">
@@ -83,7 +77,7 @@ export default function HomePage() {
                 <li className="mb-2">✔ Secure tenant–landlord connections</li>
                 <li className="mb-2">✔ Easy online booking</li>
               </ul>
-              <Button variant="success" size="lg">
+              <Button variant="success" size="lg" onClick={handleGetStarted}>
                 Get Started
               </Button>
             </Col>
