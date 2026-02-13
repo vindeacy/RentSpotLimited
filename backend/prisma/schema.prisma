@@ -15,6 +15,7 @@ model User {
   name         String?
   phone        String?
   isActive     Boolean   @default(true)
+  isVerified   Boolean   @default(false) 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   landlord     Landlord?
@@ -29,14 +30,35 @@ model Landlord {
   companyName String?
   verified    Boolean    @default(false)
   createdAt   DateTime   @default(now())
+  businessLicense String?
+  taxId          String?
+  website        String?
+  description    String?
+  rating         Float?     @default(0)
+  totalRatings   Int?       @default(0)
+  documentsUrl   String[]   @default([])
+  address        String?
+  city           String?
+  state          String?
+  postalCode     String?
+  kraPin         String?   // KRA PIN for tax compliance
+  kraVerified    Boolean   @default(false)
+  bankDetails    Json?     // Bank account for payments
   user        User       @relation(fields: [userId], references: [id])
   leases      Lease[]
   properties  Property[]
+  maintenanceRequests MaintenanceRequest[]
+  notifications       Notification[]
+  taxReturns          TaxReturn[]
+  invoices            Invoice[]
+  reviews             Review[]
 }
 
 model Tenant {
   id                       String    @id @default(uuid())
   userId                   String    @unique
+   employmentStatus         String?   
+  rating                   Int       @default(0)
   dob                      DateTime?
   idDocUrl                 String?
   createdAt                DateTime  @default(now())
@@ -57,8 +79,13 @@ model Tenant {
   previousAddress          String?
   profileCompleted         Boolean   @default(false)
   smokingStatus            String?   @default("non-smoker")
+  kraPin                   String?  
+  employerPin              String?   
   leases                   Lease[]
   payments                 Payment[]
+  maintenanceRequests      MaintenanceRequest[]
+  notifications            Notification[]
+  reviews                  Review[]
   currentProperty          Property? @relation(fields: [currentPropertyId], references: [id])
   user                     User      @relation(fields: [userId], references: [id])
 }
@@ -74,10 +101,16 @@ model Payment {
   status        String    @default("pending")
   reference     String?
   notes         String?
+  withholdingTax Float?    @default(0)  
+  vatAmount      Float?    @default(0)  
+  netAmount      Float?                 
+  kraReported    Boolean   @default(false)
+  kraReceiptNo   String?               
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lease         Lease     @relation(fields: [leaseId], references: [id])
   tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  invoice       Invoice?
 }
 
 model Property {
@@ -105,6 +138,11 @@ model Property {
   status         String          @default("vacant")
   seoTitle       String?
   seoDescription String?
+  viewCount         Int             @default(0)
+  totalInquiries    Int             @default(0)
+  lastMaintenance   DateTime?
+  nextInspection    DateTime?
+  insuranceExpiry   DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   applications   Application[]
@@ -113,6 +151,9 @@ model Property {
   landlord       Landlord        @relation(fields: [landlordId], references: [id])
   images         PropertyImage[]
   tenants        Tenant[]
+  maintenanceRequests MaintenanceRequest[]
+  expenses            Expense[]
+  reviews             Review[]
 }
 
 model PropertyImage {
@@ -130,8 +171,18 @@ model Application {
   tenantUserId   String?
   applicantName  String?
   applicantEmail String?
+  applicantPhone String?
+  currentAddress String?
+  employment     Json?
+  references     Json?
+  creditScore    Int?
+  monthlyIncome  Float?
+  moveInDate     DateTime?
   docs           Json?
   status         String   @default("new")
+  score          Float?
+  landlordNotes  String?
+  rejectionReason String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   property       Property @relation(fields: [propertyId], references: [id])
@@ -146,7 +197,24 @@ model Lease {
   endDate    DateTime?
   rent       Float?
   status     String    @default("pending")
+  deposit           Float?
+  securityDeposit   Float?
+  leaseTermMonths   Int?
+  renewalOption     Boolean   @default(false)
+  renewalNoticeDate DateTime?
+  renewalTerms      Json?
+  earlyTermination  Boolean   @default(false)
+  lateFeeAmount     Float?
+  lateFeeGracePeriod Int?     @default(5)
+  petDeposit        Float?
+  utilities         String[]  @default([])
+  restrictions      String[]  @default([])
+  specialTerms      String?
+  signedDate        DateTime?
+  terminationDate   DateTime?
+  terminationReason String?
   createdAt  DateTime  @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   landlord   Landlord  @relation(fields: [landlordId], references: [id])
   property   Property  @relation(fields: [propertyId], references: [id])
   tenant     Tenant?   @relation(fields: [tenantId], references: [id])
@@ -165,4 +233,137 @@ model Message {
   fromUser   User?     @relation("fromUser", fields: [fromUserId], references: [id])
   property   Property? @relation(fields: [propertyId], references: [id])
   toUser     User?     @relation("toUser", fields: [toUserId], references: [id])
+}
+
+model MaintenanceRequest {
+  id          String   @id @default(uuid())
+  propertyId  String
+  tenantId    String?
+  landlordId  String
+  title       String
+  description String
+  priority    String   @default("medium") // low, medium, high, urgent
+  category    String?  // plumbing, electrical, hvac, etc.
+  status      String   @default("open")   // open, in_progress, completed, cancelled
+  images      String[] @default([])
+  cost        Float?
+  assignedTo  String?  // contractor/maintenance person
+  scheduledDate DateTime?
+  completedDate DateTime?
+  landlordNotes String?
+  tenantRating  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property @relation(fields: [propertyId], references: [id])
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  landlord    Landlord @relation(fields: [landlordId], references: [id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String?  // Can be for any user type
+  landlordId String?
+  tenantId   String?
+  title      String
+  message    String
+  type       String   // payment_due, lease_expiring, maintenance_request, etc.
+  read       Boolean  @default(false)
+  actionUrl  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  landlord   Landlord? @relation(fields: [landlordId], references: [id])
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id])
+}
+
+model Review {
+  id              String   @id @default(uuid())
+  tenantId        String
+  propertyId      String
+  landlordId      String
+  rating          Int
+  title           String?
+  comment         String
+  category        String?
+  pros            String?
+  cons            String?
+  wouldRecommend  Boolean  @default(true)
+  isPublic        Boolean  @default(true)
+  isVerified      Boolean  @default(false)
+  response        String?
+  responseDate    DateTime?
+  helpfulCount    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  property        Property @relation(fields: [propertyId], references: [id])
+  landlord        Landlord @relation(fields: [landlordId], references: [id])
+
+  @@unique([tenantId, propertyId])
+  @@index([landlordId])
+  @@index([propertyId])
+  @@index([tenantId])
+}
+
+model TaxReturn {
+  id              String   @id @default(uuid())
+  landlordId      String
+  year            Int
+  quarter         Int?     // Q1, Q2, Q3, Q4
+  period          String   // e.g., "2024-Q1" or "2024"
+  totalRentalIncome Float
+  totalExpenses   Float
+  taxableIncome   Float
+  taxAmount       Float
+  withholdingTax  Float    @default(0)
+  status          String   @default("pending") // pending, filed, approved
+  filedDate       DateTime?
+  kraReference    String?  // KRA filing reference
+  metadata        Json?    // Additional tax details
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  landlord        Landlord @relation(fields: [landlordId], references: [id])
+  
+  @@unique([landlordId, year, quarter])
+}
+
+model Invoice {
+  id              String   @id @default(uuid())
+  landlordId      String
+  paymentId       String   @unique
+  invoiceNumber   String   @unique
+  invoiceDate     DateTime @default(now())
+  dueDate         DateTime
+  amount          Float
+  tax             Float    @default(0)
+  totalAmount     Float
+  status          String   @default("pending") // pending, paid, overdue, cancelled
+  etimsReference  String?  // eTIMS system reference
+  qrCode          String?  // QR code for verification
+  pdfUrl          String?  // Invoice PDF storage
+  sentToKRA       Boolean  @default(false)
+  kraAcknowledged Boolean  @default(false)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  landlord        Landlord @relation(fields: [landlordId], references: [id])
+  payment         Payment  @relation(fields: [paymentId], references: [id])
+}
+
+model Expense {
+  id              String   @id @default(uuid())
+  landlordId      String?
+  propertyId      String?
+  category        String   // maintenance, utilities, insurance, etc.
+  description     String
+  amount          Float
+  expenseDate     DateTime
+  receiptUrl      String?
+  vendor          String?
+  deductible      Boolean  @default(true)
+  kraReported     Boolean  @default(false)
+  taxYear         Int?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  property        Property? @relation(fields: [propertyId], references: [id])
 }

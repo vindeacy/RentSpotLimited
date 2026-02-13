@@ -1,11 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
+import db from '../lib/db.js';
 // Get all leases
 export async function getAllLeases(req, res) {
     try {
-        const leases = await prisma.lease.findMany({
+        const leases = await db.lease.findMany({
             include: { property: true, tenant: true, landlord: true }
         });
         res.json({ leases });
@@ -19,7 +16,7 @@ export async function getAllLeases(req, res) {
 export async function getLeaseById(req, res) {
     try {
         const { id } = req.params;
-        const lease = await prisma.lease.findUnique({
+        const lease = await db.lease.findUnique({
             where: { id },
             include: { property: true, tenant: true, landlord: true }
         });
@@ -35,7 +32,7 @@ export async function getLeaseById(req, res) {
 export async function createLease(req, res) {
     try {
         const { propertyId, tenantId, landlordId, startDate, endDate, rent, status } = req.body;
-        const lease = await prisma.lease.create({
+        const lease = await db.lease.create({
             data: {
                 property: { connect: { id: propertyId } },
                 tenant: { connect: { id: tenantId } },
@@ -58,7 +55,7 @@ export async function updateLease(req, res) {
     try {
         const { id } = req.params;
         const { propertyId, tenantId, landlordId, startDate, endDate, rent, status } = req.body;
-        const lease = await prisma.lease.update({
+        const lease = await db.lease.update({
             where: { id },
             data: {
                 ...(propertyId && { property: { connect: { id: propertyId } } }),
@@ -81,7 +78,7 @@ export async function updateLease(req, res) {
 export async function deleteLease(req, res) {
     try {
         const { id } = req.params;
-        await prisma.lease.delete({ where: { id } });
+        await db.lease.delete({ where: { id } });
         res.json({ message: 'Lease deleted successfully.' });
     } catch (err) {
         console.error('Delete lease error:', err);

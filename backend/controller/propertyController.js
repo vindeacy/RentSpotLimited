@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import db from '../lib/db.js';
 
 // Get all properties
 export async function getAllProperties(req, res) {
 	try {
-		const properties = await prisma.property.findMany({
+		const properties = await db.property.findMany({
 			include: { landlord: true, images: true, applications: true, leases: true, messages: true }
 		});
 		res.json({ properties });
@@ -18,7 +16,7 @@ export async function getAllProperties(req, res) {
 export async function getPropertyById(req, res) {
 	try {
 		const { id } = req.params;
-		const property = await prisma.property.findUnique({
+		const property = await db.property.findUnique({
 			where: { id },
 			include: { landlord: true, images: true, applications: true, leases: true, messages: true }
 		});
@@ -65,7 +63,7 @@ export async function createProperty(req, res) {
         ? amenities.split(',').map(a => a.trim())
         : [];
 
-    const property = await prisma.property.create({
+    const property = await db.property.create({
       data: {
         title,
         slug,
@@ -107,7 +105,7 @@ export async function updateProperty(req, res) {
 	try {
 		const { id } = req.params;
 		const updateData = req.body;
-		const property = await prisma.property.update({
+		const property = await db.property.update({
 			where: { id },
 			data: updateData
 		});
@@ -121,7 +119,7 @@ export async function updateProperty(req, res) {
 export async function deleteProperty(req, res) {
 	try {
 		const { id } = req.params;
-		await prisma.property.delete({ where: { id } });
+		await db.property.delete({ where: { id } });
 		res.json({ message: 'Property deleted successfully.' });
 	} catch (err) {
 		res.status(500).json({ error: 'Failed to delete property.' });

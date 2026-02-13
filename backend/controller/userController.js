@@ -1,42 +1,52 @@
-// Get all users
-export async function getAllUsers(req, res) {
-	try {
-		const users = await prisma.user.findMany({
-			select: { id: true, email: true, name: true, role: true, phone: true, isActive: true, createdAt: true, updatedAt: true }
-		});
-		return res.json({ users });
-	} catch (err) {
-		return res.status(500).json({ error: 'Failed to fetch users.' });
-	}
-}
 
-// Imports
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import db from '../lib/db.js';
 import dotenv from 'dotenv';
+import {
+	generateAccessToken,
+	generateRefreshToken,
+	setAuthCookies
+} from '../middleware/auth.js';
 
 dotenv.config();
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Register a new user
 export async function register(req, res) {
-	const { email, password, name, role } = req.body;
+	const { email, password, name, role, phone } = req.body;
 	if (!email || !password || !role) {
 		return res.status(400).json({ error: 'Email, password, and role are required.' });
 	}
 	try {
-		const existingUser = await prisma.user.findUnique({ where: { email } });
+		const existingUser = await db.user.findUnique({ where: { email } });
 		if (existingUser) {
 			return res.status(409).json({ error: 'User already exists.' });
 		}
 		const passwordHash = await bcrypt.hash(password, 10);
-		const user = await prisma.user.create({
-			data: { email, passwordHash, name, role }
+		
+		// Create user with appropriate profile
+		const user = await db.user.create({
+			data: { 
+				email, 
+				passwordHash, 
+				name, 
+				phone,
+				role,
+				// Create tenant or landlord profile based on role
+				...(role === 'tenant' ? {
+					tenant: {
+						create: {}
+					}
+				} : role === 'landlord' ? {
+					landlord: {
+						create: {}
+					}
+				} : {})
+			}
 		});
+		
 		return res.status(201).json({ message: 'User registered successfully.', user: { id: user.id, email: user.email, role: user.role } });
 	} catch (err) {
+		console.error('Registration error:', err);
 		return res.status(500).json({ error: 'Registration failed.' });
 	}
 }
@@ -47,7 +57,7 @@ export async function login(req, res) {
 		return res.status(400).json({ error: 'Email and password are required.' });
 	}
 	try {
-		const user = await prisma.user.findUnique({ where: { email } });
+		const user = await db.user.findUnique({ where: { email } });
 		if (!user) {
 			return res.status(401).json({ error: 'Invalid credentials.' });
 		}
@@ -55,8 +65,10 @@ export async function login(req, res) {
 		if (!valid) {
 			return res.status(401).json({ error: 'Invalid credentials.' });
 		}
-		const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-		return res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+		const accessToken = generateAccessToken(user.id, user.role);
+		const refreshToken = generateRefreshToken(user.id);
+		setAuthCookies(res, accessToken, refreshToken);
+		return res.json({ token: accessToken, user: { id: user.id, email: user.email, role: user.role } });
 	} catch (err) {
 		return res.status(500).json({ error: 'Login failed.' });
 	}
@@ -65,18 +77,63 @@ export async function login(req, res) {
 export async function getUserProfile(req, res) {
 	try {
 		const userId = req.user.userId;
-		const user = await prisma.user.findUnique({
+		const user = await db.user.findUnique({
 			where: { id: userId },
-			select: { id: true, email: true, name: true, role: true, phone: true, isActive: true, createdAt: true, updatedAt: true }
+			select: { 
+				id: true, 
+				email: true, 
+				name: true, 
+				role: true, 
+				phone: true, 
+				isActive: true, 
+				isVerified: true,
+				createdAt: true, 
+				updatedAt: true,
+				tenant: {
+					select: {
+						id: true,
+						employmentStatus: true,
+						rating: true,
+						moveInDate: true,
+						currentPropertyId: true,
+						emergencyContactName: true,
+						emergencyContactPhone: true,
+						emergencyContactEmail: true,
+						emergencyContactRelation: true
+					}
+				},
+				landlord: {
+					select: {
+						id: true,
+						companyName: true,
+						kraPin: true,
+						rating: true
+					}
+				}
+			}
 		});
 		if (!user) {
 			return res.status(404).json({ error: 'User not found.' });
 		}
 		return res.json({ user });
 	} catch (err) {
-		return res.status(500).json({ error: 'Failed to fetch user profile.' });
+		console.error('Profile fetch error:', err);
+		return res.status(500).json({ error: 'Failed to fetch user profile.', details: err.message });
 	}
 }
+
+// Get all users
+export async function getAllUsers(req, res) {
+	try {
+		const users = await db.user.findMany({
+			select: { id: true, email: true, name: true, role: true, phone: true, isActive: true, createdAt: true, updatedAt: true }
+		});
+		return res.json({ users });
+	} catch (err) {
+		return res.status(500).json({ error: 'Failed to fetch users.' });
+	}
+}
+
 
 // Update user profile
 export async function updateUserProfile(req, res) {
@@ -94,7 +151,7 @@ export async function updateUserProfile(req, res) {
 			if (Object.keys(updateData).length === 0) {
 				return res.status(400).json({ error: 'No valid fields to update.' });
 			}
-        const user = await prisma.user.update({
+        const user = await db.user.update({
             where: { id: userId },
             data: updateData
         });
@@ -108,7 +165,7 @@ export async function updateUserProfile(req, res) {
 export async function deleteUser(req, res) {
 	try {
 		const userId = req.params.id;
-		await prisma.user.delete({ where: { id: userId } });
+		await db.user.delete({ where: { id: userId } });
 		return res.json({ message: 'User deleted successfully.' });
 	} catch (err) {
 		return res.status(500).json({ error: 'Failed to delete user.' });

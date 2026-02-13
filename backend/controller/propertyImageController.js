@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import db from '../lib/db.js';
 
 // Get all property images
 export async function getAllPropertyImages(req, res) {
 	try {
-		const images = await prisma.propertyImage.findMany({
+		const images = await db.propertyImage.findMany({
 			include: { property: true }
 		});
 		res.json({ images });
@@ -18,7 +16,7 @@ export async function getAllPropertyImages(req, res) {
 export async function getPropertyImageById(req, res) {
 	try {
 		const { id } = req.params;
-		const image = await prisma.propertyImage.findUnique({
+		const image = await db.propertyImage.findUnique({
 			where: { id },
 			include: { property: true }
 		});
@@ -33,7 +31,7 @@ export async function getPropertyImageById(req, res) {
 export async function createPropertyImage(req, res) {
 	try {
 		const { propertyId, url, alt, position } = req.body;
-		const image = await prisma.propertyImage.create({
+		const image = await db.propertyImage.create({
 			data: { propertyId, url, alt, position }
 		});
 		res.status(201).json({ image });
@@ -47,7 +45,7 @@ export async function updatePropertyImage(req, res) {
 	try {
 		const { id } = req.params;
 		const updateData = req.body;
-		const image = await prisma.propertyImage.update({
+		const image = await db.propertyImage.update({
 			where: { id },
 			data: updateData
 		});
@@ -61,7 +59,7 @@ export async function updatePropertyImage(req, res) {
 export async function deletePropertyImage(req, res) {
 	try {
 		const { id } = req.params;
-		await prisma.propertyImage.delete({ where: { id } });
+		await db.propertyImage.delete({ where: { id } });
 		res.json({ message: 'Property image deleted successfully.' });
 	} catch (err) {
 		res.status(500).json({ error: 'Failed to delete property image.' });

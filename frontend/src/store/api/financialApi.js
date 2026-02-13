@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api/financial',
+  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token || localStorage.getItem('token');
     if (token) {
@@ -14,74 +14,71 @@ const baseQuery = fetchBaseQuery({
 export const financialApi = createApi({
   reducerPath: 'financialApi',
   baseQuery,
-  tagTypes: ['Transaction', 'RentCollection', 'Expense', 'Report'],
+  tagTypes: ['Payment', 'Financial', 'Transaction', 'Expense'],
   endpoints: (builder) => ({
-    // Transactions
+    getPayments: builder.query({
+      query: () => '/payments',
+      providesTags: ['Payment'],
+    }),
+    getPaymentById: builder.query({
+      query: (id) => `/payments/${id}`,
+      providesTags: ['Payment'],
+    }),
+    createPayment: builder.mutation({
+      query: (paymentData) => ({
+        url: '/payments',
+        method: 'POST',
+        body: paymentData,
+      }),
+      invalidatesTags: ['Payment'],
+    }),
+    updatePayment: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        url: `/payments/${id}`,
+        method: 'PUT',
+        body: patch,
+      }),
+      invalidatesTags: ['Payment'],
+    }),
     getTransactions: builder.query({
-      query: (params = {}) => {
-        const searchParams = new URLSearchParams();
-        if (params.type) searchParams.append('type', params.type);
-        if (params.startDate) searchParams.append('startDate', params.startDate);
-        if (params.endDate) searchParams.append('endDate', params.endDate);
-        if (params.property) searchParams.append('property', params.property);
-        return `?${searchParams.toString()}`;
-      },
+      query: (params) => ({
+        url: '/transactions',
+        params,
+      }),
+      providesTags: ['Transaction'],
+    }),
+    getTransactionById: builder.query({
+      query: (id) => `/transactions/${id}`,
       providesTags: ['Transaction'],
     }),
     createTransaction: builder.mutation({
       query: (transactionData) => ({
-        url: '',
+        url: '/transactions',
         method: 'POST',
         body: transactionData,
       }),
-      invalidatesTags: ['Transaction', 'RentCollection', 'Expense'],
+      invalidatesTags: ['Transaction', 'Financial'],
     }),
     updateTransaction: builder.mutation({
       query: ({ id, ...patch }) => ({
-        url: `/${id}`,
+        url: `/transactions/${id}`,
         method: 'PUT',
         body: patch,
       }),
       invalidatesTags: ['Transaction'],
     }),
-    deleteTransaction: builder.mutation({
-      query: (id) => ({
-        url: `/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Transaction'],
-    }),
-
-    // Rent Collection
     getRentCollections: builder.query({
-      query: (params = {}) => {
-        const searchParams = new URLSearchParams();
-        if (params.status) searchParams.append('status', params.status);
-        if (params.property) searchParams.append('property', params.property);
-        if (params.month) searchParams.append('month', params.month);
-        return `/rent-collection?${searchParams.toString()}`;
-      },
-      providesTags: ['RentCollection'],
-    }),
-    updateRentStatus: builder.mutation({
-      query: ({ id, status, paymentDate, paymentMethod }) => ({
-        url: `/rent-collection/${id}`,
-        method: 'PUT',
-        body: { status, paymentDate, paymentMethod },
+      query: (params) => ({
+        url: '/rent-collections',
+        params,
       }),
-      invalidatesTags: ['RentCollection', 'Transaction'],
+      providesTags: ['Payment'],
     }),
-
-    // Expenses
     getExpenses: builder.query({
-      query: (params = {}) => {
-        const searchParams = new URLSearchParams();
-        if (params.category) searchParams.append('category', params.category);
-        if (params.property) searchParams.append('property', params.property);
-        if (params.startDate) searchParams.append('startDate', params.startDate);
-        if (params.endDate) searchParams.append('endDate', params.endDate);
-        return `/expenses?${searchParams.toString()}`;
-      },
+      query: (params) => ({
+        url: '/expenses',
+        params,
+      }),
       providesTags: ['Expense'],
     }),
     createExpense: builder.mutation({
@@ -90,38 +87,39 @@ export const financialApi = createApi({
         method: 'POST',
         body: expenseData,
       }),
-      invalidatesTags: ['Expense', 'Transaction'],
+      invalidatesTags: ['Expense', 'Financial'],
     }),
-
-    // Financial Reports
     getFinancialSummary: builder.query({
-      query: (params = {}) => {
-        const searchParams = new URLSearchParams();
-        if (params.year) searchParams.append('year', params.year);
-        if (params.month) searchParams.append('month', params.month);
-        return `/summary?${searchParams.toString()}`;
-      },
-      providesTags: ['Report'],
+      query: () => '/financial/summary',
+      providesTags: ['Financial'],
     }),
-    generateReport: builder.mutation({
-      query: (reportParams) => ({
-        url: '/generate-report',
+    getFinancialReports: builder.query({
+      query: ({ range, year }) => `/financial/reports?range=${range}&year=${year}`,
+      providesTags: ['Financial'],
+    }),
+    exportFinancialReport: builder.mutation({
+      query: (reportData) => ({
+        url: '/financial/export',
         method: 'POST',
-        body: reportParams,
+        body: reportData,
       }),
     }),
   }),
 });
 
 export const {
+  useGetPaymentsQuery,
+  useGetPaymentByIdQuery,
+  useCreatePaymentMutation,
+  useUpdatePaymentMutation,
   useGetTransactionsQuery,
+  useGetTransactionByIdQuery,
   useCreateTransactionMutation,
   useUpdateTransactionMutation,
-  useDeleteTransactionMutation,
   useGetRentCollectionsQuery,
-  useUpdateRentStatusMutation,
   useGetExpensesQuery,
   useCreateExpenseMutation,
   useGetFinancialSummaryQuery,
-  useGenerateReportMutation,
+  useGetFinancialReportsQuery,
+  useExportFinancialReportMutation,
 } = financialApi;

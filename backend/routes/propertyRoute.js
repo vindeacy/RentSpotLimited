@@ -5,28 +5,24 @@ import {
   createProperty,
   updateProperty,
   deleteProperty
-} from '../controller/propertyController.js';
+  // toggleFeaturedStatus // Uncomment if you have this in your controller
+} from '../controller/propertyController.js'; 
+
 import { authenticationMiddleware } from '../Middleware/authenticationMiddleware.js';
 import { authorizeRoles } from '../Middleware/authorizationMiddleware.js';
 
 const router = express.Router();
 
-// Protect all property routes
-router.use(authenticationMiddleware);
+// Publicly accessible within this router (if needed) or keep private
+router.get('/', authenticationMiddleware, getAllProperties);
+router.get('/:id', authenticationMiddleware, getPropertyById);
 
-// Get all properties (any authenticated user)
-router.get('/', getAllProperties);
+// Protected routes
+router.post('/', authenticationMiddleware, authorizeRoles('admin', 'landlord'), createProperty);
+router.put('/:id', authenticationMiddleware, authorizeRoles('admin', 'landlord'), updateProperty);
+router.delete('/:id', authenticationMiddleware, authorizeRoles('admin'), deleteProperty);
 
-// Get single property by ID
-router.get('/:id', getPropertyById);
-
-// Create property (admin or landlord)
-router.post('/', authorizeRoles('admin', 'landlord'), createProperty);
-
-// Update property (admin or landlord)
-router.put('/:id', authorizeRoles('admin', 'landlord'), updateProperty);
-
-// Delete property (admin only)
-router.delete('/:id', authorizeRoles('admin'), deleteProperty);
+// The featured toggle you mentioned
+// router.put('/:id/featured', authenticationMiddleware, authorizeRoles('admin', 'landlord'), toggleFeaturedStatus);
 
 export default router;

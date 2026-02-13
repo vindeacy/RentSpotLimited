@@ -1,31 +1,29 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import tenantProfileController from '../controller/tenantProfileController.js';
+import { authenticationMiddleware } from '../Middleware/authenticationMiddleware.js';
+import { authorizeRoles } from '../Middleware/authorizationMiddleware.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-// Get tenant profile
-router.get('/:tenantId', async (req, res) => {
-  try {
-    const { tenantId } = req.params;
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: {
-        user: true,
-        currentProperty: true,
-        leases: {
-          include: {
-            property: true
-          }
-        }
-      }
-    });
-    res.json(tenant);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Protect all tenant profile routes
+router.use(authenticationMiddleware);
 
-// ...existing code from previous response...
+// Get tenant profile (tenant or landlord)
+router.get('/:tenantId', tenantProfileController.getTenantProfile);
+
+// Update emergency contacts (tenant only)
+router.put('/:tenantId/emergency-contact', authorizeRoles('tenant'), tenantProfileController.updateEmergencyContact);
+
+// Update tenant preferences (tenant only)
+router.put('/:tenantId/preferences', authorizeRoles('tenant'), tenantProfileController.updateTenantPreferences);
+
+// Update rental information (tenant only)
+router.put('/:tenantId/rental-info', authorizeRoles('tenant'), tenantProfileController.updateRentalInfo);
+
+// Update payment preferences (tenant only)
+router.put('/:tenantId/payment-preferences', authorizeRoles('tenant'), tenantProfileController.updatePaymentPreferences);
+
+// Update profile completeness (tenant only)
+router.put('/:tenantId/profile-completeness', authorizeRoles('tenant'), tenantProfileController.updateProfileCompleteness);
 
 export default router;

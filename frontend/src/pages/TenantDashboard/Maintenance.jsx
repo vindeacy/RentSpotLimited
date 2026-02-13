@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col, Badge, Button, Card, Table, Form, Alert, Modal } from "react-bootstrap";
+import { useGetTenantProfileQuery } from "../../store/api/tenantApi";
+import { useCreateMaintenanceRequestMutation } from '../../store/api/maintenanceApi';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -16,10 +18,15 @@ export default function Maintenance() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingRequest, setEditingRequest] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [maintenanceRequests, setMaintenanceRequests] = useState([
     { id: 1, issue: "Leaky kitchen sink", status: "Pending", date: "2025-07-10", category: "plumbing", priority: "high" },
     { id: 2, issue: "Bedroom lights flickering", status: "Resolved", date: "2025-06-28", category: "electrical", priority: "medium" }
   ]);
+  const tenantId = localStorage.getItem("tenantId");
+  const token = localStorage.getItem("token");
+  const { data: tenantProfile } = useGetTenantProfileQuery(tenantId, { skip: !tenantId });
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -33,12 +40,47 @@ export default function Maintenance() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
+  useEffect(() => {
+    const fetchRequests = async () => {
+      if (!tenantId) return;
+      setLoading(true);
+      setLoadError(false);
+      try {
+        const response = await fetch(`${API_BASE_URL}/maintenance/tenant/${tenantId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        });
+        if (!response.ok) throw new Error('Failed to fetch maintenance requests');
+        const list = await response.json();
+        const normalized = (list || []).map((req) => {
+          const status = req.status ? req.status.replace(/_/g, ' ') : 'pending';
+          const title = req.title || req.description || 'Maintenance Request';
+          return {
+            id: req.id,
+            issue: title,
+            status: status.charAt(0).toUpperCase() + status.slice(1),
+            date: req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '—',
+            category: req.category || 'other',
+            priority: req.priority || 'medium',
+            description: req.description || ''
+          };
+        });
+        setMaintenanceRequests(normalized);
+      } catch (err) {
+        setLoadError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, [tenantId, token]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -49,23 +91,68 @@ export default function Maintenance() {
       return;
     }
 
-    // Simulate form submission
-    setAlertMessage('Maintenance request submitted successfully! You will receive a confirmation email shortly.');
-    setShowAlert(true);
-    
-    // Reset form
-    setFormData({
-      title: '',
-      category: '',
-      priority: 'medium',
-      description: '',
-      location: '',
-      contactPreference: 'phone',
-      urgentReason: ''
-    });
-    
-    setShowModal(false);
-    setTimeout(() => setShowAlert(false), 5000);
+    const propertyId = tenantProfile?.currentPropertyId || tenantProfile?.leases?.[0]?.property?.id;
+
+    if (!tenantId || !propertyId) {
+      setAlertMessage('Unable to determine property for this request.');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 5000);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/maintenance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          tenantId,
+          propertyId,
+          title: formData.title,
+          description: formData.description,
+          priority: formData.priority,
+          category: formData.category
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit maintenance request');
+      }
+
+      const created = await response.json();
+      const status = created.status ? created.status.replace(/_/g, ' ') : 'open';
+      const normalized = {
+        id: created.id,
+        issue: created.title || created.description || 'Maintenance Request',
+        status: status.charAt(0).toUpperCase() + status.slice(1),
+        date: created.createdAt ? new Date(created.createdAt).toLocaleDateString() : '—',
+        category: created.category || 'other',
+        priority: created.priority || 'medium',
+        description: created.description || ''
+      };
+
+      setMaintenanceRequests(prev => [normalized, ...prev]);
+      setAlertMessage('Maintenance request submitted successfully!');
+      setShowAlert(true);
+
+      setFormData({
+        title: '',
+        category: '',
+        priority: 'medium',
+        description: '',
+        location: '',
+        contactPreference: 'phone',
+        urgentReason: ''
+      });
+      setShowModal(false);
+    } catch (error) {
+      setAlertMessage('Failed to submit maintenance request');
+      setShowAlert(true);
+    } finally {
+      setTimeout(() => setShowAlert(false), 5000);
+    }
   };
 
   const getPriorityColor = (priority) => {
@@ -80,16 +167,20 @@ export default function Maintenance() {
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'resolved': return 'success';
-      case 'in-progress': return 'primary';
-      case 'pending': return 'warning';
+      case 'resolved':
+      case 'completed': return 'success';
+      case 'in-progress':
+      case 'in progress': return 'primary';
+      case 'pending':
+      case 'open': return 'warning';
       case 'cancelled': return 'danger';
       default: return 'secondary';
     }
   };
 
   const handleEdit = (request) => {
-    if (request.status === 'Resolved' || request.status === 'Cancelled') {
+    const status = request.status?.toLowerCase();
+    if (status === 'resolved' || status === 'completed' || status === 'cancelled') {
       setAlertMessage('Cannot edit resolved or cancelled requests');
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
@@ -125,15 +216,13 @@ export default function Maintenance() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           title: editFormData.title,
           category: editFormData.category,
           priority: editFormData.priority,
-          description: editFormData.description,
-          location: editFormData.location,
-          contactPreference: editFormData.contactPreference,
-          urgentReason: editFormData.urgentReason
+          description: editFormData.description
         }),
       });
 
@@ -145,10 +234,7 @@ export default function Maintenance() {
             issue: editFormData.title,
             category: editFormData.category,
             priority: editFormData.priority,
-            description: editFormData.description,
-            location: editFormData.location,
-            contactPreference: editFormData.contactPreference,
-            urgentReason: editFormData.urgentReason
+            description: editFormData.description
           } : req)
         );
         setAlertMessage('Maintenance request updated successfully!');
@@ -168,8 +254,8 @@ export default function Maintenance() {
 
   const handleDelete = async (requestId) => {
     const request = maintenanceRequests.find(r => r.id === requestId);
-    
-    if (request.status === 'In-Progress') {
+
+    if (request?.status?.toLowerCase() === 'in-progress' || request?.status?.toLowerCase() === 'in progress') {
       setAlertMessage('Cannot delete requests that are currently in progress');
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
@@ -183,6 +269,7 @@ export default function Maintenance() {
     try {
       const response = await fetch(`${API_BASE_URL}/maintenance/${requestId}`, {
         method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
       });
 
       if (response.ok) {
@@ -206,11 +293,13 @@ export default function Maintenance() {
   };
 
   const canEdit = (request) => {
-    return request.status === 'Pending' || request.status === 'In-Progress';
+    const status = request.status?.toLowerCase();
+    return status === 'pending' || status === 'open' || status === 'in-progress' || status === 'in progress';
   };
 
   const canDelete = (request) => {
-    return request.status === 'Pending';
+    const status = request.status?.toLowerCase();
+    return status === 'pending' || status === 'open';
   };
 
   const handleEditInputChange = (e) => {
@@ -223,6 +312,18 @@ export default function Maintenance() {
       {showAlert && (
         <Alert variant={alertMessage.includes('successfully') ? 'success' : 'danger'} className="mb-4">
           {alertMessage}
+        </Alert>
+      )}
+
+      {loading && (
+        <Alert variant="info" className="mb-4">
+          Loading maintenance requests...
+        </Alert>
+      )}
+
+      {loadError && (
+        <Alert variant="danger" className="mb-4">
+          Failed to load maintenance requests.
         </Alert>
       )}
 
@@ -256,7 +357,7 @@ export default function Maintenance() {
             <Col md={3}>
               <Card className="border-0 bg-light">
                 <Card.Body className="text-center">
-                  <h5 className="text-warning mb-1">{maintenanceRequests.filter(r => r.status === 'Pending').length}</h5>
+                  <h5 className="text-warning mb-1">{maintenanceRequests.filter(r => ['pending', 'open'].includes(r.status?.toLowerCase())).length}</h5>
                   <small className="text-muted">Pending</small>
                 </Card.Body>
               </Card>
@@ -264,7 +365,7 @@ export default function Maintenance() {
             <Col md={3}>
               <Card className="border-0 bg-light">
                 <Card.Body className="text-center">
-                  <h5 className="text-success mb-1">{maintenanceRequests.filter(r => r.status === 'Resolved').length}</h5>
+                  <h5 className="text-success mb-1">{maintenanceRequests.filter(r => ['resolved', 'completed'].includes(r.status?.toLowerCase())).length}</h5>
                   <small className="text-muted">Resolved</small>
                 </Card.Body>
               </Card>

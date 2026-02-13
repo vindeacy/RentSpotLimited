@@ -1,100 +1,39 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import {
+  createPayment,
+  recordPayment,
+  getTenantPayments,
+  getLandlordPayments,
+  getPaymentById,
+  checkOverduePayments,
+  getPaymentStatistics
+} from '../controller/paymentController.js';
+import { authenticate, isLandlord, isTenant } from '../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+// All routes require authentication
+router.use(authenticate);
+
+// Create payment (landlord only)
+router.post('/', isLandlord, createPayment);
+
+// Record payment (tenant pays)
+router.patch('/:paymentId/pay', recordPayment);
 
 // Get tenant payments
-router.get('/tenant/:tenantId', async (req, res) => {
-  try {
-    const { tenantId } = req.params;
-    const payments = await prisma.payment.findMany({
-      where: { tenantId },
-      include: {
-        lease: {
-          include: {
-            property: true
-          }
-        }
-      },
-      orderBy: { dueDate: 'desc' }
-    });
-    res.json(payments);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/tenant/:tenantId', getTenantPayments);
 
-// Create new payment
-router.post('/', async (req, res) => {
-  try {
-    const { tenantId, leaseId, amount, dueDate, paymentMethod } = req.body;
-    const payment = await prisma.payment.create({
-      data: {
-        tenantId,
-        leaseId,
-        amount,
-        dueDate,
-        paymentMethod,
-        status: 'pending'
-      },
-      include: {
-        lease: {
-          include: {
-            property: true
-          }
-        }
-      }
-    });
-    res.status(201).json(payment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Get landlord payments
+router.get('/landlord/:landlordId', isLandlord, getLandlordPayments);
 
-// Update payment status - fix the endpoint path
-router.put('/:paymentId/status', async (req, res) => {
-  try {
-    const { paymentId } = req.params;
-    const { status, paidDate, reference, notes, paymentMethod } = req.body;
-    
-    const payment = await prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status,
-        paidDate: status === 'paid' ? paidDate || new Date() : null,
-        reference,
-        notes,
-        paymentMethod: paymentMethod || undefined
-      },
-      include: {
-        lease: {
-          include: {
-            property: true
-          }
-        }
-      }
-    });
-    res.json(payment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Get payment by ID
+router.get('/:paymentId', getPaymentById);
+
+// Check and update overdue payments
+router.post('/check-overdue', checkOverduePayments);
 
 // Get payment statistics
-router.get('/tenant/:tenantId/stats', async (req, res) => {
-  try {
-    const { tenantId } = req.params;
-    const stats = await prisma.payment.groupBy({
-      by: ['status'],
-      where: { tenantId },
-      _count: { status: true },
-      _sum: { amount: true }
-    });
-    res.json(stats);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/statistics/summary', getPaymentStatistics);
 
 export default router;

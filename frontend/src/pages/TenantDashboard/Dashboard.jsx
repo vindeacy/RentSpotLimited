@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Badge, Button, Card, Table, Form, ListGroup, Modal } from "react-bootstrap";
 import Profile from "./profile.jsx";
-import PropertyDetails from "../LandlordDahboard/propertyManagement.jsx";
+import { useGetTenantProfileQuery } from "../../store/api/tenantApi";
 
 import Maintenance from "./Maintenance.jsx";
 import Reviews from "./Reviews.jsx";
@@ -54,6 +54,36 @@ const sidebarItems = [
 function Rentals() {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
+  const tenantId = localStorage.getItem("tenantId");
+  const { data: tenantProfile, isLoading, isError } = useGetTenantProfileQuery(tenantId, {
+    skip: !tenantId
+  });
+
+  const rentalsData = (tenantProfile?.leases || []).map((lease) => {
+    const property = lease.property || {};
+    const landlord = lease.landlord || property.landlord || {};
+    const landlordName = landlord.companyName || landlord.user?.name || "—";
+    const address = [property.addressLine, property.city, property.state, property.postalCode]
+      .filter(Boolean)
+      .join(", ") || "—";
+
+    return {
+      id: lease.id,
+      propertyTitle: property.title || "—",
+      address,
+      landlord: landlordName,
+      rent: lease.rent ?? property.price ?? null,
+      deposit: lease.deposit ?? lease.securityDeposit ?? property.deposit ?? null,
+      startDate: lease.startDate,
+      endDate: lease.endDate,
+      status: lease.status || "—",
+      termMonths: lease.leaseTermMonths ?? "—",
+      renewalOption: lease.renewalOption ? "Yes" : "No",
+      property,
+      lease,
+      landlordDetails: landlord
+    };
+  });
 
   function handleShowDetails(rental) {
     setSelectedRental(rental);
@@ -65,62 +95,110 @@ function Rentals() {
     setSelectedRental(null);
   }
 
+  const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : "—");
+  const formatCurrency = (value) => (typeof value === "number" ? value.toLocaleString() : "—");
+
   return (
     <>
       <Card className="shadow-sm mb-4">
         <Card.Body>
           <h4 className="mb-3">My Rentals</h4>
-          <Table hover responsive bordered>
-            <thead className="table-light">
-              <tr>
-                <th>ID</th>
-                <th>Address</th>
-                <th>Landlord</th>
-                <th>Rent (KSh)</th>
-                <th>Lease</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rentals.map(r => (
-                <tr key={r.id}>
-                  <td>{r.id}</td>
-                  <td>{r.address}</td>
-                  <td>{r.landlord}</td>
-                  <td>{r.rent.toLocaleString()}</td>
-                  <td>{r.lease}</td>
-                  <td>
-                    <Badge bg={r.status === "Active" ? "success" : "secondary"}>
-                      {r.status}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => handleShowDetails(r)}
-                    >
-                      View Details
-                    </Button>
-                  </td>
+          {!tenantId && (
+            <div className="text-muted">No tenant profile found. Please log in again.</div>
+          )}
+          {tenantId && isLoading && (
+            <div className="text-muted">Loading rentals...</div>
+          )}
+          {tenantId && isError && (
+            <div className="text-danger">Failed to load rentals. Please try again.</div>
+          )}
+          {tenantId && !isLoading && !isError && (
+            <Table hover responsive bordered>
+              <thead className="table-light">
+                <tr>
+                  <th>Property</th>
+                  <th>Address</th>
+                  <th>Landlord</th>
+                  <th>Rent (KSh)</th>
+                  <th>Deposit (KSh)</th>
+                  <th>Lease Start</th>
+                  <th>Lease End</th>
+                  <th>Status</th>
+                  <th>Term (Months)</th>
+                  <th>Renewal</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {rentalsData.length === 0 ? (
+                  <tr>
+                    <td colSpan={11} className="text-center text-muted">
+                      No rentals found.
+                    </td>
+                  </tr>
+                ) : (
+                  rentalsData.map((rental) => (
+                    <tr key={rental.id}>
+                      <td>{rental.propertyTitle}</td>
+                      <td>{rental.address}</td>
+                      <td>{rental.landlord}</td>
+                      <td>{formatCurrency(rental.rent)}</td>
+                      <td>{formatCurrency(rental.deposit)}</td>
+                      <td>{formatDate(rental.startDate)}</td>
+                      <td>{formatDate(rental.endDate)}</td>
+                      <td>
+                        <Badge bg={rental.status === "active" || rental.status === "Active" ? "success" : "secondary"}>
+                          {rental.status}
+                        </Badge>
+                      </td>
+                      <td>{rental.termMonths}</td>
+                      <td>{rental.renewalOption}</td>
+                      <td>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleShowDetails(rental)}
+                        >
+                          View Details
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          )}
         </Card.Body>
       </Card>
 
-      {/* Modal for Property Details */}
       <Modal show={showDetails} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Property Details</Modal.Title>
+          <Modal.Title>Rental Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedRental ? (
-            <PropertyDetails property={selectedRental} />
+            <div>
+              <h5 className="mb-3">Property</h5>
+              <Row className="g-3">
+                <Col md={6}><strong>Title:</strong> {selectedRental.propertyTitle}</Col>
+                <Col md={6}><strong>Address:</strong> {selectedRental.address}</Col>
+                <Col md={6}><strong>Landlord:</strong> {selectedRental.landlord}</Col>
+                <Col md={6}><strong>Rent:</strong> KSh {formatCurrency(selectedRental.rent)}</Col>
+                <Col md={6}><strong>Deposit:</strong> KSh {formatCurrency(selectedRental.deposit)}</Col>
+              </Row>
+
+              <hr className="my-4" />
+              <h5 className="mb-3">Lease</h5>
+              <Row className="g-3">
+                <Col md={6}><strong>Start Date:</strong> {formatDate(selectedRental.startDate)}</Col>
+                <Col md={6}><strong>End Date:</strong> {formatDate(selectedRental.endDate)}</Col>
+                <Col md={6}><strong>Status:</strong> {selectedRental.status}</Col>
+                <Col md={6}><strong>Term:</strong> {selectedRental.termMonths} months</Col>
+                <Col md={6}><strong>Renewal Option:</strong> {selectedRental.renewalOption}</Col>
+              </Row>
+            </div>
           ) : (
-            <div>No property selected.</div>
+            <div>No rental selected.</div>
           )}
         </Modal.Body>
       </Modal>
@@ -136,6 +214,51 @@ function Payments() {
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [paymentsData, setPaymentsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const tenantId = localStorage.getItem("tenantId");
+  const token = localStorage.getItem("token");
+
+  const formatMonth = (value) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  };
+
+  const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : "—");
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      if (!tenantId) return;
+      setIsLoading(true);
+      setIsError(false);
+      try {
+        const response = await fetch(`${API_BASE_URL}/payments/tenant/${tenantId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        });
+        if (!response.ok) throw new Error('Failed to fetch payments');
+        const payload = await response.json();
+        const list = payload.payments || payload.data || payload || [];
+        const normalized = list.map((payment) => ({
+          id: payment.id,
+          invoiceRef: payment.reference || payment.id,
+          month: formatMonth(payment.dueDate || payment.createdAt),
+          amount: payment.amount,
+          status: payment.status || "pending",
+          method: payment.paymentMethod || "—",
+          date: formatDate(payment.paidDate || payment.dueDate || payment.createdAt)
+        }));
+        setPaymentsData(normalized);
+      } catch (err) {
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, [tenantId, token]);
 
   const paymentMethods = [
     { 
@@ -190,10 +313,34 @@ function Payments() {
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Show success message
+      const response = await fetch(`${API_BASE_URL}/payments/${selectedPayment.id}/pay`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          paymentMethod: selectedMethod.value,
+          reference: `REF-${Date.now()}`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Payment failed');
+      }
+
+      const updated = await response.json();
+      setPaymentsData((prev) =>
+        prev.map((p) => (p.id === selectedPayment.id ? {
+          ...p,
+          status: 'paid',
+          method: selectedMethod.label,
+          date: formatDate(updated?.data?.paidDate || new Date())
+        } : p))
+      );
+
       alert(`Payment of KSh ${selectedPayment.amount.toLocaleString()} processed successfully via ${selectedMethod.label}!`);
-      
-      // Close modals and reset
+
       setShowPaymentDetails(false);
       setSelectedPayment(null);
       setSelectedMethod(null);
@@ -215,54 +362,71 @@ function Payments() {
       <Card className="shadow-sm mb-4">
         <Card.Body>
           <h4 className="mb-3">Payments & Rent History</h4>
-          <Table hover responsive bordered>
-            <thead className="table-light">
-              <tr>
-                <th>Invoice</th>
-                <th>Month</th>
-                <th>Amount (KSh)</th>
-                <th>Status</th>
-                <th>Method</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map(p => (
-                <tr key={p.id}>
-                  <td>{p.id}</td>
-                  <td>{p.month}</td>
-                  <td>{p.amount.toLocaleString()}</td>
-                  <td>
-                    <Badge bg={p.status === "Paid" ? "success" : "warning"}>{p.status}</Badge>
-                  </td>
-                  <td>{p.method}</td>
-                  <td>{p.date}</td>
-                  <td>
-                    {p.status === "Paid" ? (
-                      <Button 
-                        variant="outline-secondary" 
-                        size="sm"
-                        onClick={() => handleDownloadReceipt(p)}
-                      >
-                        <i className="bi bi-download me-1"></i>
-                        Receipt
-                      </Button>
-                    ) : (
-                      <Button 
-                        variant="primary" 
-                        size="sm"
-                        onClick={() => handlePayNow(p)}
-                      >
-                        <i className="bi bi-credit-card me-1"></i>
-                        Pay Now
-                      </Button>
-                    )}
-                  </td>
+          {!tenantId && (
+            <div className="text-muted">No tenant profile found. Please log in again.</div>
+          )}
+          {tenantId && isLoading && (
+            <div className="text-muted">Loading payments...</div>
+          )}
+          {tenantId && isError && (
+            <div className="text-danger">Failed to load payments. Please try again.</div>
+          )}
+          {tenantId && !isLoading && !isError && (
+            <Table hover responsive bordered>
+              <thead className="table-light">
+                <tr>
+                  <th>Invoice</th>
+                  <th>Month</th>
+                  <th>Amount (KSh)</th>
+                  <th>Status</th>
+                  <th>Method</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {paymentsData.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center text-muted">No payments found.</td>
+                  </tr>
+                ) : (
+                  paymentsData.map(p => (
+                    <tr key={p.id}>
+                      <td>{p.invoiceRef}</td>
+                      <td>{p.month}</td>
+                      <td>{typeof p.amount === "number" ? p.amount.toLocaleString() : "—"}</td>
+                      <td>
+                        <Badge bg={p.status?.toLowerCase() === "paid" ? "success" : "warning"}>{p.status}</Badge>
+                      </td>
+                      <td>{p.method}</td>
+                      <td>{p.date}</td>
+                      <td>
+                        {p.status?.toLowerCase() === "paid" ? (
+                          <Button 
+                            variant="outline-secondary" 
+                            size="sm"
+                            onClick={() => handleDownloadReceipt(p)}
+                          >
+                            <i className="bi bi-download me-1"></i>
+                            Receipt
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="primary" 
+                            size="sm"
+                            onClick={() => handlePayNow(p)}
+                          >
+                            <i className="bi bi-credit-card me-1"></i>
+                            Pay Now
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          )}
         </Card.Body>
       </Card>
 
@@ -1113,37 +1277,67 @@ function ReviewsWrapper() {
 
 // Notifications Component
 function Notifications() {
-  const [notificationList, setNotificationList] = useState(notifications);
+  const tenantId = localStorage.getItem("tenantId");
+  const token = localStorage.getItem("token");
+  const [notificationList, setNotificationList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const markAsRead = (id) => {
-    setNotificationList(prev => 
-      prev.map(n => n.id === id ? { ...n, unread: false } : n)
-    );
+  const markAsRead = async (id) => {
+    try {
+      await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+        method: 'PATCH',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+      });
+    } finally {
+      setNotificationList(prev => 
+        prev.map(n => n.id === id ? { ...n, unread: false } : n)
+      );
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotificationList(prev => 
-      prev.map(n => ({ ...n, unread: false }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: 'PATCH',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+      });
+    } finally {
+      setNotificationList(prev => 
+        prev.map(n => ({ ...n, unread: false }))
+      );
+    }
   };
 
   useEffect(() => {
-    // Simulate real-time notifications
-    const interval = setInterval(() => {
-      if (Math.random() > 0.8) {
-        const newNotification = {
-          id: Date.now(),
-          title: "New Update",
-          message: "You have a new message from your landlord.",
-          time: "Just now",
-          unread: true
-        };
-        setNotificationList(prev => [newNotification, ...prev]);
+    const fetchNotifications = async () => {
+      if (!tenantId) return;
+      setIsLoading(true);
+      setIsError(false);
+      try {
+        const response = await fetch(`${API_BASE_URL}/notifications`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        });
+        if (!response.ok) throw new Error('Failed to fetch notifications');
+        const payload = await response.json();
+        const list = payload.notifications || payload.data || payload || [];
+        const mapped = list.map((n) => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          time: n.createdAt ? new Date(n.createdAt).toLocaleString() : "—",
+          unread: !n.read
+        }));
+        setNotificationList(mapped);
+      } catch (err) {
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
       }
-    }, 30000);
+    };
 
-    return () => clearInterval(interval);
-  }, []);
+    fetchNotifications();
+  }, [tenantId, token]);
 
   return (
     <Card className="shadow-sm mb-4">
@@ -1154,31 +1348,42 @@ function Notifications() {
             Mark all as read
           </Button>
         </div>
-        <ListGroup>
-          {notificationList.length === 0 ? (
-            <ListGroup.Item className="text-center text-muted">
-              No new notifications
-            </ListGroup.Item>
-          ) : (
-            notificationList.map(notification => (
-              <ListGroup.Item
-                key={notification.id}
-                className={`d-flex justify-content-between align-items-center ${
-                  notification.unread ? 'bg-light' : ''
-                }`}
-                style={{ cursor: 'pointer' }}
-                onClick={() => markAsRead(notification.id)}
-              >
-                <div>
-                  <strong>{notification.title}</strong>
-                  {notification.unread && <Badge bg="primary" className="ms-2">New</Badge>}
-                  <div className="text-muted small">{notification.message}</div>
-                </div>
-                <small className="text-muted">{notification.time}</small>
+        {!tenantId && (
+          <div className="text-muted">No tenant profile found. Please log in again.</div>
+        )}
+        {tenantId && isLoading && (
+          <div className="text-muted">Loading notifications...</div>
+        )}
+        {tenantId && isError && (
+          <div className="text-danger">Failed to load notifications. Please try again.</div>
+        )}
+        {tenantId && !isLoading && !isError && (
+          <ListGroup>
+            {notificationList.length === 0 ? (
+              <ListGroup.Item className="text-center text-muted">
+                No new notifications
               </ListGroup.Item>
-            ))
-          )}
-        </ListGroup>
+            ) : (
+              notificationList.map(notification => (
+                <ListGroup.Item
+                  key={notification.id}
+                  className={`d-flex justify-content-between align-items-center ${
+                    notification.unread ? 'bg-light' : ''
+                  }`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => markAsRead(notification.id)}
+                >
+                  <div>
+                    <strong>{notification.title}</strong>
+                    {notification.unread && <Badge bg="primary" className="ms-2">New</Badge>}
+                    <div className="text-muted small">{notification.message}</div>
+                  </div>
+                  <small className="text-muted">{notification.time}</small>
+                </ListGroup.Item>
+              ))
+            )}
+          </ListGroup>
+        )}
       </Card.Body>
     </Card>
   );

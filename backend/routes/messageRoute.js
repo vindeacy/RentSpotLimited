@@ -1,31 +1,36 @@
 import express from 'express';
-import { authenticationMiddleware } from '../Middleware/authenticationMiddleware.js';
 import {
-	getAllMessages,
-	getMessageById,
-	createMessage,
-	updateMessage,
-	deleteMessage
+  getConversations,
+  getConversationMessages,
+  sendMessage,
+  getUnreadCount,
+  markAsRead,
+  deleteMessage
 } from '../controller/messageController.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Protect all message routes
-router.use(authenticationMiddleware);
+// All routes require authentication
+router.use(authenticate);
 
-// Get all messages
-router.get('/', getAllMessages);
+// Get all conversations
+router.get('/conversations', getConversations);
 
-// Get single message by ID
-router.get('/:id', getMessageById);
+// Get conversation messages
+router.get('/conversations/:otherUserId', getConversationMessages);
+router.get('/conversations/:otherUserId/:propertyId', getConversationMessages);
 
-// Create message
-router.post('/', createMessage);
+// Send message
+router.post('/send', sendMessage);
 
-// Update message
-router.put('/:id', updateMessage);
+// Get unread count
+router.get('/unread/count', getUnreadCount);
+
+// Mark message as read
+router.patch('/:messageId/read', markAsRead);
 
 // Delete message
-router.delete('/:id', deleteMessage);
+router.delete('/:messageId', deleteMessage);
 
 export default router;

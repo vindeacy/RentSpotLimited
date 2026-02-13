@@ -1,21 +1,44 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import db from '../lib/db.js';
 
 const tenantProfileController = {
   // Get tenant profile
   getTenantProfile: async (req, res) => {
     try {
       const { tenantId } = req.params;
-      const tenant = await prisma.tenant.findUnique({
+      const tenant = await db.tenant.findUnique({
         where: { id: tenantId },
         include: {
           user: true,
-          currentProperty: true,
+          currentProperty: {
+            include: {
+              landlord: {
+                include: {
+                  user: true
+                }
+              }
+            }
+          },
           leases: {
             include: {
-              property: true
+              property: {
+                include: {
+                  landlord: {
+                    include: {
+                      user: true
+                    }
+                  }
+                }
+              },
+              landlord: {
+                include: {
+                  user: true
+                }
+              }
             }
-          }
+          },
+          payments: true,
+          maintenanceRequests: true,
+          notifications: true
         }
       });
       res.json(tenant);
@@ -30,7 +53,7 @@ const tenantProfileController = {
       const { tenantId } = req.params;
       const { emergencyContactName, emergencyContactPhone, emergencyContactEmail, emergencyContactRelation } = req.body;
       
-      const tenant = await prisma.tenant.update({
+      const tenant = await db.tenant.update({
         where: { id: tenantId },
         data: {
           emergencyContactName,
@@ -51,7 +74,7 @@ const tenantProfileController = {
       const { tenantId } = req.params;
       const { maxRent, preferredAreas, petOwner, smokingStatus } = req.body;
       
-      const tenant = await prisma.tenant.update({
+      const tenant = await db.tenant.update({
         where: { id: tenantId },
         data: {
           maxRent,
@@ -70,17 +93,14 @@ const tenantProfileController = {
   updateRentalInfo: async (req, res) => {
     try {
       const { tenantId } = req.params;
-      const { currentPropertyId, moveInDate, previousAddress, employmentStatus, employer, monthlyIncome } = req.body;
-      
-      const tenant = await prisma.tenant.update({
+      const { currentPropertyId, moveInDate, previousAddress } = req.body;
+
+      const tenant = await db.tenant.update({
         where: { id: tenantId },
         data: {
           currentPropertyId,
           moveInDate,
-          previousAddress,
-          employmentStatus,
-          employer,
-          monthlyIncome
+          previousAddress
         }
       });
       res.json(tenant);
@@ -95,7 +115,7 @@ const tenantProfileController = {
       const { tenantId } = req.params;
       const { preferredPaymentMethod, bankAccountInfo } = req.body;
       
-      const tenant = await prisma.tenant.update({
+      const tenant = await db.tenant.update({
         where: { id: tenantId },
         data: {
           preferredPaymentMethod,
@@ -112,19 +132,18 @@ const tenantProfileController = {
   updateProfileCompleteness: async (req, res) => {
     try {
       const { tenantId } = req.params;
-      
-      const tenant = await prisma.tenant.findUnique({
+
+      const tenant = await db.tenant.findUnique({
         where: { id: tenantId }
       });
 
       const profileCompleted = !!(
         tenant.emergencyContactName &&
         tenant.emergencyContactPhone &&
-        tenant.employmentStatus &&
         tenant.preferredPaymentMethod
       );
 
-      const updatedTenant = await prisma.tenant.update({
+      const updatedTenant = await db.tenant.update({
         where: { id: tenantId },
         data: { profileCompleted }
       });

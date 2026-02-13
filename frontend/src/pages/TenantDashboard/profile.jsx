@@ -1,39 +1,25 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Alert, Card, Spinner } from 'react-bootstrap';
+import { useGetUserProfileQuery, useUpdateUserProfileMutation } from '../../store/api/userApi';
 
 export default function Profile() {
-  const [profile, setProfile] = useState(null);
+  const { data, isLoading, error: fetchError, refetch } = useGetUserProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
+  
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ name: '', email: '' });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Fetch profile on mount
+  // Update form when data is loaded
   useEffect(() => {
-    async function fetchProfile() {
-      setLoading(true);
-      setError('');
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/auth/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setError(data.error || 'Failed to load profile');
-        } else {
-          setProfile(data);
-          setForm({ name: data.name || '', email: data.email || '' });
-        }
-      } catch {
-        setError('Network error');
-      }
-      setLoading(false);
+    if (data?.user) {
+      setForm({ 
+        name: data.user.name || '', 
+        email: data.user.email || '' 
+      });
     }
-    fetchProfile();
-  }, []);
+  }, [data]);
 
   // Handle form changes
   function handleChange(e) {
@@ -43,40 +29,41 @@ export default function Profile() {
   // Handle profile update
   async function handleSave(e) {
     e.preventDefault();
-    setSaving(true);
     setError('');
     setSuccess('');
+    
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Update failed');
-      } else {
-        setSuccess('Profile updated!');
-        setProfile(data);
-        setEditMode(false);
-      }
-    } catch {
-      setError('Network error');
+      await updateProfile(form).unwrap();
+      setSuccess('Profile updated!');
+      setEditMode(false);
+      refetch();
+    } catch (err) {
+      setError(err?.data?.error || 'Update failed');
     }
-    setSaving(false);
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-50">
         <Spinner animation="border" />
       </div>
     );
   }
+
+  if (fetchError) {
+    return (
+      <Card className="mx-auto mt-5" style={{ maxWidth: 500 }}>
+        <Card.Body>
+          <Alert variant="danger">
+            Failed to load profile: {fetchError?.data?.error || 'Unknown error'}
+          </Alert>
+          <Button onClick={refetch}>Retry</Button>
+        </Card.Body>
+      </Card>
+    );
+  }
+
+  const profile = data?.user;
 
   return (
     <Card className="mx-auto mt-5" style={{ maxWidth: 500 }}>
@@ -88,6 +75,26 @@ export default function Profile() {
           <>
             <div className="mb-3"><strong>Name:</strong> {profile?.name}</div>
             <div className="mb-3"><strong>Email:</strong> {profile?.email}</div>
+            <div className="mb-3"><strong>Phone:</strong> {profile?.phone || 'Not set'}</div>
+            <div className="mb-3"><strong>Role:</strong> {profile?.role}</div>
+            {profile?.tenant && (
+              <>
+                <hr />
+                <h5>Tenant Information</h5>
+                <div className="mb-3"><strong>Employment Status:</strong> {profile.tenant.employmentStatus || 'Not set'}</div>
+                <div className="mb-3"><strong>Rating:</strong> {profile.tenant.rating || 'N/A'}</div>
+                <div className="mb-3"><strong>Move-in Date:</strong> {profile.tenant.moveInDate ? new Date(profile.tenant.moveInDate).toLocaleDateString() : 'Not set'}</div>
+                {profile.tenant.emergencyContactName && (
+                  <>
+                    <hr />
+                    <h5>Emergency Contact</h5>
+                    <div className="mb-3"><strong>Name:</strong> {profile.tenant.emergencyContactName}</div>
+                    <div className="mb-3"><strong>Phone:</strong> {profile.tenant.emergencyContactPhone}</div>
+                    <div className="mb-3"><strong>Email:</strong> {profile.tenant.emergencyContactEmail || 'Not set'}</div>
+                  </>
+                )}
+              </>
+            )}
             <Button variant="outline-primary" onClick={() => setEditMode(true)}>
               Edit Profile
             </Button>
@@ -113,10 +120,10 @@ export default function Profile() {
                 required
               />
             </Form.Group>
-            <Button variant="primary" type="submit" disabled={saving}>
-              {saving ? 'Saving...' : 'Save Changes'}
+            <Button variant="primary" type="submit" disabled={isUpdating}>
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </Button>{' '}  
-            <Button variant="secondary" onClick={() => setEditMode(false)} disabled={saving}>
+            <Button variant="secondary" onClick={() => setEditMode(false)} disabled={isUpdating}>
               Cancel
             </Button>
             </Form>

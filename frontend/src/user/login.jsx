@@ -1,35 +1,45 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
+import { useLoginMutation } from "../store/api/authApi";
+import { setCredentials } from "../store/slices/authSlice";
 import karen from "../images/karen.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [login, { isLoading, error: apiError }] = useLoginMutation();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Login failed");
+      const result = await login({ email, password }).unwrap();
+      
+      // Dispatch credentials to Redux store
+      dispatch(setCredentials({
+        user: result.user,
+        token: result.token,
+        role: result.user.role
+      }));
+      
+      // Navigate based on role
+      const role = result.user.role;
+      if (role === "tenant") {
+        navigate("/dashboard");
+      } else if (role === "landlord" || role === "admin") {
+        navigate("/landlord-dashboard");
       } else {
-        localStorage.setItem("token", data.token);
-        alert("Login successful!");
-        // You can redirect here if needed
+        navigate("/");
       }
     } catch (err) {
-      setError("Network error");
+      setError(err?.data?.error || "Login failed");
     }
-    setLoading(false);
   }
 
   return (
@@ -80,9 +90,9 @@ export default function Login() {
                     variant="primary"
                     type="submit"
                     className="w-100 fw-semibold"
-                    disabled={loading}
+                    disabled={isLoading}
                   >
-                    {loading ? "Logging in..." : "Login"}
+                    {isLoading ? "Logging in..." : "Login"}
                   </Button>
                 </Form>
                 <div className="mt-4 text-center">

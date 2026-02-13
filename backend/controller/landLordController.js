@@ -1,6 +1,59 @@
-import { PrismaClient } from '@prisma/client';
+import db from '../lib/db.js';
 
-const prisma = new PrismaClient();
+// Get dashboard stats for landlord
+export async function getDashboardStats(req, res) {
+	try {
+		const landlordId = req.user.landlordId; // Assuming middleware adds this
+
+		// Get landlord's properties count
+		const totalProperties = await db.property.count({
+			where: { landlordId }
+		});
+
+		// Get active tenants count
+		const totalTenants = await db.lease.count({
+			where: {
+				landlordId,
+				status: 'active'
+			}
+		});
+
+		// Get pending maintenance requests
+		const pendingMaintenance = await db.maintenanceRequest.count({
+			where: {
+				landlordId,
+				status: { in: ['open', 'in_progress'] }
+			}
+		});
+
+		// Calculate monthly revenue (simplified - sum of all active leases rent)
+		const activeLeases = await db.lease.findMany({
+			where: {
+				landlordId,
+				status: 'active'
+			},
+			select: { rent: true }
+		});
+
+		const monthlyRevenue = activeLeases.reduce((sum, lease) => sum + (lease.rent || 0), 0);
+
+		// Calculate occupancy rate
+		const totalUnits = totalProperties; // Simplified - assuming 1 unit per property
+		const occupiedUnits = totalTenants;
+		const occupancyRate = totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
+
+		res.json({
+			totalProperties,
+			totalTenants,
+			monthlyRevenue,
+			pendingMaintenance,
+			occupancyRate
+		});
+	} catch (err) {
+		console.error('Dashboard stats error:', err);
+		res.status(500).json({ error: 'Failed to fetch dashboard stats.' });
+	}
+}
 
 // Get all landlords
 export async function getAllLandlords(req, res) {

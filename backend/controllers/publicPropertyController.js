@@ -1,217 +1,104 @@
-import { PrismaClient } from '@prisma/client';
+import db from '../lib/db.js';
 
-const prisma = new PrismaClient();
-
-// @desc    Get all public properties
-// @route   GET /api/public/properties
-// @access  Public
 export const getPublicProperties = async (req, res) => {
   try {
-    const {
-      query,
-      city,
-      country,
-      type,
-      minPrice,
-      maxPrice,
-      limit,
-      featured
-    } = req.query;
+    const { query, city, type, minPrice, maxPrice, featured, limit } = req.query;
 
-    // Build where clause
+    // 1. Match the status in your Prisma Model ("vacant")
     const where = {
-      status: 'AVAILABLE',
-      isActive: true,
-      AND: []
+      status: 'vacant', 
     };
 
-    // Text search in title and description
+    // 2. Search logic
     if (query) {
-      where.AND.push({
-        OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } }
-        ]
-      });
+      where.OR = [
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } }
+      ];
     }
 
-    // Location filters
-    if (city) {
-      where.AND.push({
-        city: { contains: city, mode: 'insensitive' }
-      });
-    }
+    // 3. Correct Field Names from your schema
+    if (city) where.city = { contains: city, mode: 'insensitive' };
+    if (type) where.propertyType = type; // Use propertyType, not type
 
-    if (country) {
-      where.AND.push({
-        country: { contains: country, mode: 'insensitive' }
-      });
-    }
-
-    // Property type filter
-    if (type) {
-      where.AND.push({ type });
-    }
-
-    // Price range filters
     if (minPrice || maxPrice) {
-      const priceFilter = {};
-      if (minPrice) priceFilter.gte = parseFloat(minPrice);
-      if (maxPrice) priceFilter.lte = parseFloat(maxPrice);
-      where.AND.push({ rent: priceFilter });
+      where.price = { // Use price, not rent
+        gte: minPrice ? parseFloat(minPrice) : undefined,
+        lte: maxPrice ? parseFloat(maxPrice) : undefined,
+      };
     }
 
-    // Featured properties filter
-    if (featured === 'true') {
-      where.AND.push({ featured: true });
-    }
-
-    // Clean up empty AND array
-    if (where.AND.length === 0) {
-      delete where.AND;
-    }
-
-    const properties = await prisma.property.findMany({
+    const properties = await db.property.findMany({
       where,
-      include: {
-        landlord: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true
-          }
-        }
-      },
-      orderBy: [
-        { featured: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: limit ? parseInt(limit) : undefined
+      include: { images: true },
+      // limit comes from the frontend prop
+      take: limit ? parseInt(limit) : (featured === 'true' ? 6 : undefined), 
+      orderBy: { createdAt: 'desc' }
     });
 
-    res.json({
-      success: true,
-      count: properties.length,
-      properties
-    });
-
-  } catch (error) {
-    console.error('Error fetching public properties:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching properties',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
+    // 4. Return the key the frontend expects
+    res.json({ properties });
+  } catch (err) {
+    console.error("Prisma Error:", err.message);
+    res.status(500).json({ error: 'Failed to fetch properties' });
   }
 };
 
-// @desc    Get single public property by ID
-// @route   GET /api/public/properties/:id
-// @access  Public
 export const getPublicPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const property = await prisma.property.findUnique({
+    const property = await db.property.findUnique({
       where: { id },
-      include: {
-        landlord: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true
-          }
-        }
-      }
+      include: { images: true },
     });
 
     if (!property) {
-      return res.status(404).json({
-        success: false,
-        message: 'Property not found'
-      });
+      return res.status(404).json({ error: 'Property not found' });
     }
 
-    // Only show available/active properties publicly
-    if (property.status !== 'AVAILABLE' || !property.isActive) {
-      return res.status(404).json({
-        success: false,
-        message: 'Property not available'
-      });
-    }
-
-    res.json({
-      success: true,
-      property
-    });
-
-  } catch (error) {
-    console.error('Error fetching property:', error);
-    
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching property',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
+    res.json({ property });
+  } catch (err) {
+    console.error("Prisma Error:", err.message);
+    res.status(500).json({ error: 'Failed to fetch property' });
   }
 };
 
-// @desc    Get search suggestions
-// @route   GET /api/public/properties/search/suggestions
-// @access  Public
 export const getSearchSuggestions = async (req, res) => {
   try {
-    const { term } = req.query;
+    const { query } = req.query;
 
-    if (!term) {
-      return res.json({
-        success: true,
-        suggestions: {
-          cities: [],
-          types: []
-        }
-      });
+    if (!query || query.length < 2) {
+      return res.json({ suggestions: [] });
     }
 
-    // Get unique cities
-    const cities = await prisma.property.findMany({
+    const properties = await db.property.findMany({
       where: {
-        city: { contains: term, mode: 'insensitive' },
-        status: 'AVAILABLE',
-        isActive: true
+        status: 'vacant',
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { city: { contains: query, mode: 'insensitive' } },
+        ],
       },
-      select: { city: true },
-      distinct: ['city'],
-      take: 5
-    });
-
-    // Get unique property types
-    const types = await prisma.property.findMany({
-      where: {
-        type: { contains: term, mode: 'insensitive' },
-        status: 'AVAILABLE',
-        isActive: true
+      select: {
+        id: true,
+        title: true,
+        city: true,
+        propertyType: true,
       },
-      select: { type: true },
-      distinct: ['type'],
-      take: 5
+      take: 5,
     });
 
-    res.json({
-      success: true,
-      suggestions: {
-        cities: cities.map(c => c.city),
-        types: types.map(t => t.type)
-      }
-    });
+    const suggestions = properties.map(p => ({
+      id: p.id,
+      title: p.title,
+      city: p.city,
+      type: p.propertyType,
+    }));
 
-  } catch (error) {
-    console.error('Error fetching search suggestions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching suggestions'
-    });
+    res.json({ suggestions });
+  } catch (err) {
+    console.error("Prisma Error:", err.message);
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
   }
 };

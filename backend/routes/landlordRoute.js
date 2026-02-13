@@ -6,13 +6,17 @@ import {
 	getLandlordById,
 	createLandlord,
 	updateLandlord,
-	deleteLandlord
+	deleteLandlord,
+	getDashboardStats
 } from '../controller/landLordController.js';
 
 const router = express.Router();
 
 // Protect all landlord routes
 router.use(authenticationMiddleware);
+
+// Get dashboard stats for landlord
+router.get('/dashboard-stats', authorizeRoles('landlord'), getDashboardStats);
 
 // Get all landlords (admin only)
 router.get('/', authorizeRoles('admin'), getAllLandlords);
